@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "266686473772",
+    "firebase_url": "https://hackoverflow-2725e-default-rtdb.firebaseio.com",
+    "project_id": "hackoverflow-2725e",
+    "storage_bucket": "hackoverflow-2725e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266686473772:android:f24e771654e6b1ebab9389",
+        "android_client_info": {
+          "package_name": "com.open_innov.hackingly_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCywtRm-uGxs4N87yHpjje8cQE7P9s7IKE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
