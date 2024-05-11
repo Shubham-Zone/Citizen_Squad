@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-
 import 'Constants.dart';
 import 'ReportsModel.dart';
 
 class MongoProvider extends ChangeNotifier {
+
   static Db? _db;
   static late DbCollection _collection;
 
@@ -17,7 +17,7 @@ class MongoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setReport(Map<String, String> data) async {
+  Future<void> setReport(Map<String, dynamic> data) async {
     try {
       await _collection.insert(data); // Await the insertion operation
     } catch (e) {
@@ -35,4 +35,6 @@ class MongoProvider extends ChangeNotifier {
     }
     return reportList;
   }
+
+
 }

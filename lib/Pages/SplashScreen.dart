@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Abondoned Vehicle",
+                  "Citizen Squad",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 32,

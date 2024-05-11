@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,15 +9,14 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
 import '../Helpers/Provider.dart';
 import '../Mongodb/MongoProvider.dart';
 
-const kGoogleApiKey = "AIzaSyA7_khvsZQDQ_m1eV55_Jme_jsYBkDlxdw";
-// AIzaSyCZv0YWrLWPnJZk5PzYVz3c96jJHRZXDbU
-const key = "AIzaSyAtq7C8dLqmBOcga3FVA-XiErhl1nvw2WE";
+const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
 
 class CriminalCars extends StatefulWidget {
   const CriminalCars({super.key});
@@ -26,6 +26,8 @@ class CriminalCars extends StatefulWidget {
 }
 
 class _CriminalCarsState extends State<CriminalCars> {
+
+  bool _uploading = false;
 
   // Longitude and latitude of user location
   double lat = 0.0;
@@ -42,24 +44,27 @@ class _CriminalCarsState extends State<CriminalCars> {
 
   // Image url from firebase storage
   String imageUrl = "";
+  List<String> imageUrls = [];
 
-  // Car no
-  String carNo = "xxxxxxxxxx";
+  static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference rto = FirebaseDatabase.instance.ref().child("RTO");
+  DatabaseReference db = FirebaseDatabase.instance.ref().child("RTO").child(userid);
 
   // Pick image from the gallery
   Future<void> getImageFromGallery(bool numb) async {
-    final List<XFile> pickedFiles = await picker.pickMultiImage();
-    final XFile? num_plate = await picker.pickImage(source: ImageSource.gallery);
 
     if (numb) {
-      if (num_plate != null && num_plate.path.isNotEmpty) {
-        setState(() {
-          _numberPlate = File(num_plate.path);
+      final XFile? numPlate = await picker.pickImage(source: ImageSource.gallery);
+      if (numPlate != null && numPlate.path.isNotEmpty) {
+        String no = await getImageTotext(numPlate.path);
+        setState(()  {
+          _numberPlate = File(numPlate.path);
+          carNum.text = no;
+          _images.add(_numberPlate!);
         });
       }
     } else {
+      final List<XFile> pickedFiles = await picker.pickMultiImage();
       if (pickedFiles != null && pickedFiles.isNotEmpty) {
         setState(() {
           if (_images.isEmpty) {
@@ -72,18 +77,23 @@ class _CriminalCarsState extends State<CriminalCars> {
     }
   }
 
-// Pick image from camera
+  // Pick image from camera
   Future<void> getImageFromCamera(bool numb) async {
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.camera);
-    final XFile? numPlate = await picker.pickImage(source: ImageSource.camera);
 
     if (numb) {
+
+      final XFile? numPlate = await picker.pickImage(source: ImageSource.camera);
+      String no = await getImageTotext(numPlate!.path);
       if (numPlate != null && numPlate.path.isNotEmpty) {
         setState(() {
+          carNum.text = no;
           _numberPlate = File(numPlate.path);
+          _images.add(_numberPlate!);
         });
       }
     } else {
+
+      final XFile? pickedFile = await picker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
           _image = File(pickedFile.path);
@@ -93,7 +103,15 @@ class _CriminalCarsState extends State<CriminalCars> {
     }
   }
 
-// Image picking options
+  Future getImageTotext(final imagePath) async {
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    final RecognizedText recognizedText =
+    await textRecognizer.processImage(InputImage.fromFilePath(imagePath));
+    String text = recognizedText.text.toString();
+    return text;
+  }
+
+  // Image picking options
   void showOptions(bool numb) {
     showCupertinoModalPopup(
       context: context,
@@ -122,9 +140,9 @@ class _CriminalCarsState extends State<CriminalCars> {
     );
   }
 
-
   TextEditingController carLoc = TextEditingController();
   TextEditingController suggestion = TextEditingController();
+  TextEditingController carNum = TextEditingController();
 
   Future<void> _getAddressFromMap(double lat, double lang) async {
     try {
@@ -142,6 +160,7 @@ class _CriminalCarsState extends State<CriminalCars> {
   }
 
   void getUserLocation() async {
+
     bool serviceEnabled;
     LocationPermission permission;
     Position? position;
@@ -214,6 +233,7 @@ class _CriminalCarsState extends State<CriminalCars> {
   @override
   void initState() {
     getUserLocation();
+    carLoc.text = "P.I.E.T - Panipat Institute of Engineering & Technology";
     super.initState();
   }
 
@@ -223,7 +243,7 @@ class _CriminalCarsState extends State<CriminalCars> {
       MaterialPageRoute(
         builder: (context) =>
             PlacePicker(
-              apiKey: Platform.isAndroid ? kGoogleApiKey : "YOUR_IOS_API_KEY",
+              apiKey: Platform.isAndroid ? kGoogleApiKey : kGoogleApiKey,
               onPlacePicked: (result) {
                 setState(() {
                   lat = result.geometry!.location.lat;
@@ -240,34 +260,42 @@ class _CriminalCarsState extends State<CriminalCars> {
     );
   }
 
-  // Function to submit report
   void submitReport(BuildContext context) async {
-    //unique id
-    String uniqueFileName = DateTime
-        .now()
-        .millisecondsSinceEpoch
-        .toString();
+
+    setState(() {
+      _uploading = true;
+    });
 
     //step1: pick image from gallery
     // ImagePicker imagepicker=ImagePicker();
     // XFile? file = await imagepicker.pickImage(source: ImageSource.gallery);
 
     // pic=file!.path;
-    if (_image.path.isEmpty) return;
+    // if (_image.path.isEmpty) return;
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please upload images of garbage"), backgroundColor: Colors.red,));
+      return;
+    }
 
-    //step2: Upload to firebase storage
-
-    //get the ref to storage root
-    Reference refenceroot = FirebaseStorage.instance.ref();
-
-    //create a ref for the image to be stored
-    Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+    // Upload to firebase storage
 
     //store the file
     try {
-      await refImgtoUpload.putFile(_image);
-      //get the download url
-      imageUrl = await refImgtoUpload.getDownloadURL();
+
+      for(var imageFile in _images){
+        //unique id
+        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        //get the ref to storage root
+        Reference refenceroot = FirebaseStorage.instance.ref();
+        //create a ref for the image to be stored
+        Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+        await refImgtoUpload.putFile(imageFile);
+        //get the download url
+        String imgUrl = await refImgtoUpload.getDownloadURL();
+        imageUrls.add(imgUrl);
+      }
+
+
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -277,24 +305,37 @@ class _CriminalCarsState extends State<CriminalCars> {
 
     final mongoProvider = Provider.of<MongoProvider>(context, listen: false);
 
-    Map<String, String> data = {
+
+
+    Map<String, dynamic> data = {
       "_id":mongo.ObjectId().oid,
-      "imageUrl": imageUrl,
-      "location": carLoc.text,
-      "lang": lang.toString(),
-      "lat": lat.toString(),
+      "imageUrl": imageUrls,
+      "location": carLoc.text.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : carLoc.text,
+      "lang": "77.0138832",
+      "lat": "29.2110672",
       "suggestion": suggestion.text,
-      "carNo": carNo
+      "carNo": carNum.text,
+      "status":"0"
     };
 
     mongoProvider.setReport(data);
 
+    db.push().set(data);
+
     setState(() {
       _image=File("");
+      _images.clear();
+      imageUrls.clear();
+      _uploading = false;
+      _numberPlate = File("");
+      carNum.clear();
+      carLoc.clear();
+      suggestion.clear();
     });
 
+
     // rto.push().set(data);
-    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly")));
+    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly"), backgroundColor: Colors.green,));
 
   }
 
@@ -314,186 +355,222 @@ class _CriminalCarsState extends State<CriminalCars> {
         backgroundColor:Colors.orangeAccent,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Abondoned Car Images", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                ),
-                const SizedBox(height: 10,),
-                GestureDetector(
-                  onTap: (){
-                    showOptions(false);
-                  },
-                  child: _images.isEmpty
-                      ? Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12.0),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(
+                      height: 10,
                     ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.camera_alt,
-                            size: 40,
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Abondoned Car Images", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                    ),
+                    const SizedBox(height: 10,),
+                    GestureDetector(
+                      onTap: (){
+                        showOptions(false);
+                      },
+                      child: _images.isEmpty
+                          ? Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.camera_alt,
+                                size: 40,
+                              ),
+                              Text('Tap to add image')
+                            ],
                           ),
-                          Text('Tap to add image')
-                        ],
+                        ),
+                      )
+                          : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _images.map((image) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey, // Choose your border color
+                                      width: 2.0, // Choose the width of the border
+                                    ),
+                                    borderRadius: BorderRadius.circular(12.0), // Choose the border radius
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0), // Same as border radius
+                                    child: Image.file(
+                                      image,
+                                      width: 250,
+                                      height: 250,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  )
-                      : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _images.map((image) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey, // Choose your border color
-                                  width: 2.0, // Choose the width of the border
-                                ),
-                                borderRadius: BorderRadius.circular(12.0), // Choose the border radius
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Visibility(
+                      visible: _images.isNotEmpty,
+                      child: ElevatedButton(
+                        onPressed: (){
+                          showOptions(false);
+                        },
+                        child: const Text("Add more images"),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Car NumberPlate",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                    ),
+                    const SizedBox(height: 10,),
+                    GestureDetector(
+                      onTap: () {
+                        showOptions(true);
+                      },
+                      child: _numberPlate == null
+                          ? Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.camera_alt,
+                                size: 40,
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10.0), // Same as border radius
-                                child: Image.file(
-                                  image,
-                                  width: 250,
-                                  height: 250,
-                                  fit: BoxFit.cover,
-                                ),
+                              Text('Add number plate image'),
+                            ],
+                          ),
+                        ),
+                      )
+                          : Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey, // Choose your border color
+                                width: 2.0, // Choose the width of the border
+                              ),
+                              borderRadius: BorderRadius.circular(12.0), // Choose the border radius
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0), // Same as border radius
+                              child: Image.file(
+                                _numberPlate!, // Ensure _numberPlate is not null using null assertion operator (!)
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Visibility(
-                  visible: _images.isNotEmpty,
-                  child: ElevatedButton(
-                    onPressed: (){
-                      showOptions(false);
-                    },
-                    child: const Text("Add more images"),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Car NumberPlate",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                ),
-                const SizedBox(height: 10,),
-                GestureDetector(
-              onTap: () {
-                showOptions(true);
-              },
-              child: _numberPlate == null
-                  ? Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.camera_alt,
-                        size: 40,
-                      ),
-                      Text('Add number plate image'),
-                    ],
-                  ),
-                ),
-              )
-                  : Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey, // Choose your border color
-                        width: 2.0, // Choose the width of the border
-                      ),
-                      borderRadius: BorderRadius.circular(12.0), // Choose the border radius
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0), // Same as border radius
-                      child: Image.file(
-                        _numberPlate!, // Ensure _numberPlate is not null using null assertion operator (!)
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: carNum,
+                      decoration: InputDecoration(
+                        labelText: 'Car number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: carLoc,
+                      decoration: InputDecoration(
+                        labelText: 'Car Location',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: selectLocation,
+                      child: const Text('Select Location'),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: suggestion,
+                      decoration: InputDecoration(
+                        labelText: 'Suggestion',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => submitReport(context),
+                      child: const Text('Submit Report'),
+                    ),
+                  ],
                 ),
               ),
             ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: carLoc,
-                  decoration: InputDecoration(
-                    labelText: 'Car Location',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal, width: 2),
-                    ),
+            if (_uploading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        "Please wait...",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: selectLocation,
-                  child: const Text('Select Location'),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: suggestion,
-                  decoration: InputDecoration(
-                    labelText: 'Suggestion',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal, width: 2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => submitReport(context),
-                  child: const Text('Submit Report'),
-                ),
-              ],
-            ),
-          ),
+              ),
+          ]
         ),
       ),
     );

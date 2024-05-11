@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,13 +12,9 @@ import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
-
 import '../Helpers/Provider.dart';
 import '../Mongodb/MongoProvider.dart';
-
-const kGoogleApiKey = "AIzaSyA7_khvsZQDQ_m1eV55_Jme_jsYBkDlxdw";
-// AIzaSyCZv0YWrLWPnJZk5PzYVz3c96jJHRZXDbU
-const key = "AIzaSyAtq7C8dLqmBOcga3FVA-XiErhl1nvw2WE";
+const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
 
 class PotHolesReport extends StatefulWidget {
   const PotHolesReport({super.key});
@@ -28,7 +25,9 @@ class PotHolesReport extends StatefulWidget {
 
 class _PotHolesReportState extends State<PotHolesReport> {
 
-// Longitude and latitude of user location
+  bool _uploading = false;
+
+  // Longitude and latitude of user location
   double lat = 0.0;
   double lang = 0.0;
 
@@ -42,8 +41,10 @@ class _PotHolesReportState extends State<PotHolesReport> {
   // Image url from firebase storage
   String imageUrl = "";
 
+  static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference rto = FirebaseDatabase.instance.ref().child("MCB").child("PotHoles");
+  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("PotHoles").child(userid);
+
 
   // Pick image from the gallery
   Future<void> getImageFromGallery() async {
@@ -201,7 +202,7 @@ class _PotHolesReportState extends State<PotHolesReport> {
       context,
       MaterialPageRoute(
         builder: (context) => PlacePicker(
-          apiKey: Platform.isAndroid ? kGoogleApiKey : "YOUR_IOS_API_KEY",
+          apiKey: Platform.isAndroid ? kGoogleApiKey : kGoogleApiKey,
           onPlacePicked: (result) {
             setState(() {
               lat = result.geometry!.location.lat;
@@ -218,31 +219,45 @@ class _PotHolesReportState extends State<PotHolesReport> {
     );
   }
 
+  List<String> imageUrls = [];
+
   // Function to submit report
   void submitReport(BuildContext context) async {
-    //unique id
-    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    setState(() {
+      _uploading = true;
+    });
 
     //step1: pick image from gallery
     // ImagePicker imagepicker=ImagePicker();
     // XFile? file = await imagepicker.pickImage(source: ImageSource.gallery);
 
     // pic=file!.path;
-    if (_image.path.isEmpty) return;
+    // if (_image.path.isEmpty) return;
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please upload images of garbage"), backgroundColor: Colors.red,), );
+      return;
+    }
 
-    //step2: Upload to firebase storage
-
-    //get the ref to storage root
-    Reference refenceroot = FirebaseStorage.instance.ref();
-
-    //create a ref for the image to be stored
-    Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+    // Upload to firebase storage
 
     //store the file
     try {
-      await refImgtoUpload.putFile(_image);
-      //get the download url
-      imageUrl = await refImgtoUpload.getDownloadURL();
+
+      for(var imageFile in _images){
+        //unique id
+        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        //get the ref to storage root
+        Reference refenceroot = FirebaseStorage.instance.ref();
+        //create a ref for the image to be stored
+        Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+        await refImgtoUpload.putFile(imageFile);
+        //get the download url
+        String imgUrl = await refImgtoUpload.getDownloadURL();
+        imageUrls.add(imgUrl);
+      }
+
+
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -252,27 +267,31 @@ class _PotHolesReportState extends State<PotHolesReport> {
 
     final mongoProvider = Provider.of<MongoProvider>(context, listen: false);
 
-    Map<String, String> data = {
-      "_id": mongo.ObjectId().oid,
-      "imageUrl": imageUrl,
-      "location": potholeLoc.text,
-      "lang": lang.toString(),
-      "lat": lat.toString(),
+    Map<String, dynamic> data = {
+      "_id":mongo.ObjectId().oid,
+      "imageUrl": imageUrls,
+      "location": potholeLoc.text.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : potholeLoc.text,
+      "lang": "77.0138832",
+      "lat": "29.2110672",
       "suggestion": suggestion.text,
-
+      "status":"0"
     };
 
     mongoProvider.setReport(data);
 
+    db.push().set(data);
+
     setState(() {
-      _image = File("");
+      _image=File("");
+      _images.clear();
+      imageUrls.clear();
+      _uploading = false;
+      suggestion.clear();
     });
 
     // rto.push().set(data);
-    if (mounted){
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(" Reports Submitted Successfuly")));
-    }
+    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly"), backgroundColor: Colors.green,));
+
   }
 
   @override
@@ -289,139 +308,160 @@ class _PotHolesReportState extends State<PotHolesReport> {
         backgroundColor: Colors.orangeAccent,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Pothole Images",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    showOptions();
-                  },
-                  child: _images.isEmpty
-                      ? Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(12.0),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(
+                      height: 10,
                     ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.camera_alt,
-                            size: 40,
-                          ),
-                          Text('Tap to add image')
-                        ],
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        "Pothole Images",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                     ),
-                  )
-                      : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _images.map((image) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors
-                                      .grey, // Choose your border color
-                                  width:
-                                  2.0, // Choose the width of the border
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                    12.0), // Choose the border radius
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        showOptions();
+                      },
+                      child: _images.isEmpty
+                          ? Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.camera_alt,
+                                size: 40,
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                    10.0), // Same as border radius
-                                child: Image.file(
-                                  image,
-                                  width: 250,
-                                  height: 250,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
+                              Text('Tap to add image')
+                            ],
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      )
+                          : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _images.map((image) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors
+                                          .grey, // Choose your border color
+                                      width:
+                                      2.0, // Choose the width of the border
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                        12.0), // Choose the border radius
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Same as border radius
+                                    child: Image.file(
+                                      image,
+                                      width: 250,
+                                      height: 250,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  controller: potholeLoc,
-                  decoration: InputDecoration(
-                    labelText: 'Pothole Location',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
+                    const SizedBox(
+                      height: 5,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide:
-                      const BorderSide(color: Colors.teal, width: 2),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: selectLocation,
-                  child: const Text('Select Location'),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: suggestion,
-                  decoration: InputDecoration(
-                    labelText: 'Suggestion',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
+                    const SizedBox(
+                      height: 10,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide:
-                      const BorderSide(color: Colors.teal, width: 2),
+                    TextField(
+                      controller: potholeLoc,
+                      decoration: InputDecoration(
+                        labelText: 'Pothole Location',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide:
+                          const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: selectLocation,
+                      child: const Text('Select Location'),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: suggestion,
+                      decoration: InputDecoration(
+                        labelText: 'Suggestion',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide:
+                          const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => submitReport(context),
+                      child: const Text('Submit Report'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => submitReport(context),
-                  child: const Text('Submit Report'),
-                ),
-              ],
+              ),
             ),
-          ),
+            if (_uploading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        "Please wait...",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

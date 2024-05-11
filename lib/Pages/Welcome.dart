@@ -22,12 +22,12 @@ class Welcome extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              "Welcome to Abondoned Vehicles",
+              "Welcome to Citizen Squad",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: Colors.deepOrange,
               ),
             ),
             const SizedBox(height: 10),
@@ -144,7 +144,7 @@ class _InformationCollectionState extends State<InformationCollection> {
     return Scaffold(
       appBar: AppBar(
         elevation: 10,
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.deepOrange,
         title: const Center(
           child: Text(
             "Input information",
@@ -167,7 +167,7 @@ class _InformationCollectionState extends State<InformationCollection> {
               const FadeInIcon(
                 icon: Icons.insert_drive_file_outlined,
                 size: 100,
-                color: Colors.teal,
+                color: Colors.deepOrange,
               ),
               const SizedBox(height: 20),
               const SizedBox(height: 30),

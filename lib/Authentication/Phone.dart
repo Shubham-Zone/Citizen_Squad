@@ -63,11 +63,11 @@ class _PhoneState extends State<Phone> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Lottie.asset(
-              //     "assets/lottie/authentication.json",
-              //     height: 200,
-              //     fit: BoxFit.cover
-              // ),
+              Lottie.asset(
+                  "assets/lottie/auth2.json",
+                  height: 200,
+                  fit: BoxFit.cover
+              ),
               const SizedBox(
                 height: 40,
               ),
@@ -162,7 +162,7 @@ class _PhoneState extends State<Phone> {
                       }
                     ,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFDE6262),
+
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)
                         )
@@ -173,9 +173,7 @@ class _PhoneState extends State<Phone> {
               ),
               Visibility(
                 visible: _canShowCircular,
-                child: const CircularProgressIndicator(color: Color(0xFFDE6262),),
-              )
-
+                child: const CircularProgressIndicator(),),
             ],
           ),
         ),

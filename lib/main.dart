@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hackingly_new/Pages/index.dart';
 import 'package:provider/provider.dart';
+import 'Authentication/otp.dart';
 import 'Helpers/Provider.dart';
 import 'Mongodb/MongoProvider.dart';
 import 'Pages/SplashScreen.dart';
 import 'firebase_options.dart';
+import 'Authentication/Phone.dart';
 
 void main() async {
   // Connect to MongoDB
@@ -13,7 +15,6 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  print("Initializing Firebase...");
 
   if (Firebase.apps.isNotEmpty) {
     // The Firebase app has already been initialized, so don't initialize it again.
@@ -44,10 +45,10 @@ class MyApp extends StatelessWidget {
         title: 'Abandoned Vehicle',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrangeAccent),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           useMaterial3: true,
         ),
-        home: const Index(),
+        home: const SplashScreen(),
       ),
     );
   }

@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,13 +10,12 @@ import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
-
+import 'package:geolocator/geolocator.dart';
 import '../Helpers/Provider.dart';
 import '../Mongodb/MongoProvider.dart';
 
-const kGoogleApiKey = "AIzaSyA7_khvsZQDQ_m1eV55_Jme_jsYBkDlxdw";
-// AIzaSyCZv0YWrLWPnJZk5PzYVz3c96jJHRZXDbU
-const key = "AIzaSyAtq7C8dLqmBOcga3FVA-XiErhl1nvw2WE";
+const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
+
 
 class GarbageReport extends StatefulWidget {
   const GarbageReport({super.key});
@@ -26,39 +25,33 @@ class GarbageReport extends StatefulWidget {
 }
 
 class _GarbageReportState extends State<GarbageReport> {
-// Longitude and latitude of user location
+
+  bool _uploading = false;
+
+  // Longitude and latitude of user location
   double lat = 0.0;
   double lang = 0.0;
 
   LatLng myLatLang = const LatLng(0.0, 0.0);
 
-// Image of car
+  // Image of car
   late File _image = File('');
   List<File> _images = [];
   final picker = ImagePicker();
   File? _numberPlate;
 
-// Image url from firebase storage
+  // Image url from firebase storage
   String imageUrl = "";
 
-// Car no
-  String carNo = "xxxxxxxxxx";
+  static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference rto = FirebaseDatabase.instance.ref().child("MCB").child("Garbage");
+  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("Garbage").child(userid);
 
-// Pick image from the gallery
+
+  // Pick image from the gallery
   Future<void> getImageFromGallery(bool numb) async {
     final List<XFile> pickedFiles = await picker.pickMultiImage();
-    final XFile? num_plate =
-        await picker.pickImage(source: ImageSource.gallery);
 
-    if (numb) {
-      if (num_plate != null && num_plate.path.isNotEmpty) {
-        setState(() {
-          _numberPlate = File(num_plate.path);
-        });
-      }
-    } else {
       if (pickedFiles != null && pickedFiles.isNotEmpty) {
         setState(() {
           if (_images.isEmpty) {
@@ -67,33 +60,24 @@ class _GarbageReportState extends State<GarbageReport> {
             _images.addAll(pickedFiles.map((file) => File(file.path)).toList());
           }
         });
-      }
+
     }
   }
 
-// Pick image from camera
+  // Pick image from camera
   Future<void> getImageFromCamera(bool numb) async {
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.camera);
-    final XFile? numPlate = await picker.pickImage(source: ImageSource.camera);
 
-    if (numb) {
-      if (numPlate != null && numPlate.path.isNotEmpty) {
-        setState(() {
-          _numberPlate = File(numPlate.path);
-        });
-      }
-    } else {
+      final XFile? pickedFile =
+      await picker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
           _image = File(pickedFile.path);
           _images.add(_image);
         });
-      }
     }
   }
 
-// Image picking options
+  // Image picking options
   void showOptions(bool numb) {
     showCupertinoModalPopup(
       context: context,
@@ -220,7 +204,7 @@ class _GarbageReportState extends State<GarbageReport> {
       context,
       MaterialPageRoute(
         builder: (context) => PlacePicker(
-          apiKey: Platform.isAndroid ? kGoogleApiKey : "YOUR_IOS_API_KEY",
+          apiKey: Platform.isAndroid ? kGoogleApiKey : kGoogleApiKey,
           onPlacePicked: (result) {
             setState(() {
               lat = result.geometry!.location.lat;
@@ -237,31 +221,45 @@ class _GarbageReportState extends State<GarbageReport> {
     );
   }
 
-// Function to submit report
+  List<String> imageUrls = [];
+
+  // Function to submit report
   void submitReport(BuildContext context) async {
-    //unique id
-    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    setState(() {
+      _uploading = true;
+    });
 
     //step1: pick image from gallery
     // ImagePicker imagepicker=ImagePicker();
     // XFile? file = await imagepicker.pickImage(source: ImageSource.gallery);
 
     // pic=file!.path;
-    if (_image.path.isEmpty) return;
+    // if (_image.path.isEmpty) return;
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please upload images of garbage"), backgroundColor: Colors.red,));
+      return;
+    }
 
-    //step2: Upload to firebase storage
-
-    //get the ref to storage root
-    Reference refenceroot = FirebaseStorage.instance.ref();
-
-    //create a ref for the image to be stored
-    Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+    // Upload to firebase storage
 
     //store the file
     try {
-      await refImgtoUpload.putFile(_image);
-      //get the download url
-      imageUrl = await refImgtoUpload.getDownloadURL();
+
+      for(var imageFile in _images){
+        //unique id
+        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        //get the ref to storage root
+        Reference refenceroot = FirebaseStorage.instance.ref();
+        //create a ref for the image to be stored
+        Reference refImgtoUpload = refenceroot.child(uniqueFileName);
+        await refImgtoUpload.putFile(imageFile);
+        //get the download url
+        String imgUrl = await refImgtoUpload.getDownloadURL();
+        imageUrls.add(imgUrl);
+      }
+
+
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -271,31 +269,37 @@ class _GarbageReportState extends State<GarbageReport> {
 
     final mongoProvider = Provider.of<MongoProvider>(context, listen: false);
 
-    Map<String, String> data = {
-      "_id": mongo.ObjectId().oid,
-      "imageUrl": imageUrl,
-      "location": garbageLoc.text,
-      "lang": lang.toString(),
-      "lat": lat.toString(),
+    Map<String, dynamic> data = {
+      "_id":mongo.ObjectId().oid,
+      "imageUrl": imageUrls,
+      "location": garbageLoc.text.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : garbageLoc.text,
+      "lang": "77.0138832",
+      "lat": "29.2110672",
       "suggestion": suggestion.text,
-
+      "status":"0"
     };
 
     mongoProvider.setReport(data);
 
+    db.push().set(data);
+
     setState(() {
-      _image = File("");
+      _image=File("");
+      _images.clear();
+      imageUrls.clear();
+      _uploading = false;
+      _numberPlate = File("");
+      suggestion.clear();
     });
 
     // rto.push().set(data);
-    if (mounted){
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(" Reports Submitted Successfuly")));
-    }
+    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly"), backgroundColor: Colors.green,));
+
   }
 
   @override
   Widget build(BuildContext context) {
+
     final userProvider = Provider.of<ReportsProvider>(context);
 
     userProvider.getUserDetail();
@@ -308,141 +312,163 @@ class _GarbageReportState extends State<GarbageReport> {
         backgroundColor: Colors.orangeAccent,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Garbage Images",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    showOptions(false);
-                  },
-                  child: _images.isEmpty
-                      ? Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(12.0),
+        child: Stack(
+          children:[
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        "Garbage Images",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        showOptions(false);
+                      },
+                      child: _images.isEmpty
+                          ? Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.camera_alt,
+                                size: 40,
+                              ),
+                              Text('Tap to add image')
+                            ],
                           ),
-                          child: const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.camera_alt,
-                                  size: 40,
-                                ),
-                                Text('Tap to add image')
-                              ],
-                            ),
-                          ),
-                        )
-                      : SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: _images.map((image) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors
-                                            .grey, // Choose your border color
-                                        width:
-                                            2.0, // Choose the width of the border
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          12.0), // Choose the border radius
+                        ),
+                      )
+                          : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _images.map((image) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors
+                                          .grey, // Choose your border color
+                                      width:
+                                      2.0, // Choose the width of the border
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                          10.0), // Same as border radius
-                                      child: Image.file(
-                                        image,
-                                        width: 250,
-                                        height: 250,
-                                        fit: BoxFit.cover,
-                                      ),
+                                    borderRadius: BorderRadius.circular(
+                                        12.0), // Choose the border radius
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                        10.0), // Same as border radius
+                                    child: Image.file(
+                                      image,
+                                      width: 250,
+                                      height: 250,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          ),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  controller: garbageLoc,
-                  decoration: InputDecoration(
-                    labelText: 'Garbage Location',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide:
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      controller: garbageLoc,
+                      decoration: InputDecoration(
+                        labelText: 'Garbage Location',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide:
                           const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: selectLocation,
-                  child: const Text('Select Location'),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: suggestion,
-                  decoration: InputDecoration(
-                    labelText: 'Suggestion',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: const BorderSide(color: Colors.teal),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: selectLocation,
+                      child: const Text('Select Location'),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide:
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: suggestion,
+                      decoration: InputDecoration(
+                        labelText: 'Suggestion',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Colors.teal),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide:
                           const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => submitReport(context),
+                      child: const Text('Submit Report'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => submitReport(context),
-                  child: const Text('Submit Report'),
-                ),
-              ],
+              ),
             ),
-          ),
+            if (_uploading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        "Please wait...",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ]
         ),
       ),
     );
   }
+
 }

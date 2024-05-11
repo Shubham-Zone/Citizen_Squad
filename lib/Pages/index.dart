@@ -136,157 +136,209 @@ class _IndexState extends State<Index> {
       setState(() {
         userAvatarPath = image.path; // Set the selected image path
       });
-      prefs.setString('user_avatar', userAvatarPath!); // Save the image path to SharedPreferences
+      if (userAvatarPath != null) {
+        prefs.setString('user_avatar', userAvatarPath);
+      }
+
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<ReportsProvider>(context);
     userProvider.getUserDetail();
     userProvider.greeting();
-
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(5),
-              margin: const EdgeInsets.only(left: 5, right: 5),
-              decoration: BoxDecoration(
-                  border: Border.all(
-                      color: Colors.grey,
-                      width: 2
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(5),
+                margin: const EdgeInsets.only(left: 10, right: 10),
+                decoration: BoxDecoration(
+                  color: Colors.deepOrangeAccent.withOpacity(0.4),
+                    border: Border.all(
+                        color: Colors.grey,
+                        width: 2
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      // User Avatar
+                      GestureDetector(
+                        onTap: _pickImageFromGallery, // Call function to pick image from gallery
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundImage: userAvatarPath != null && userAvatarPath.isNotEmpty ? FileImage(File(userAvatarPath)) : null,
+                          // Show icon when no image is selected
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Hi, ${userProvider.name}",
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width*0.6,
+                            child: const Text(
+                              "Be a cleanliness activist, not a dirt contributor",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black  ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width*0.6,
+                            child: Text(
+                              "Your Location: ${userLoc.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : userLoc}",
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(20)
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
+              const SizedBox(height: 20),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.deepOrangeAccent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // User Avatar
-                    GestureDetector(
-                      onTap: _pickImageFromGallery, // Call function to pick image from gallery
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundImage: userAvatarPath.isNotEmpty
-                            ? FileImage(File(userAvatarPath))
-                            : null,
-                        child: userAvatarPath.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
-                        // Show icon when no image is selected
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      child: SizedBox(
+                        height: 200, // Set a fixed height for the ListView
+                        child: ListView.builder(
+                          itemCount: images.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=>pages[index]));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 5),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(28),
+                                        child: Image.asset(
+                                          images[index],
+                                          width: 150,
+                                          height: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      labels[index],
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Hi, ${userProvider.name}",
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        const SizedBox(height: 4),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width*0.6,
-                          child: const Text(
-                            "Be a cleanliness activist, not a dirt contributor",
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w100, ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Your Location: ${userLoc.isEmpty ? "Unknown location" : userLoc}",
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey),
-                        ),
-                      ],
+                    const SizedBox(height: 10),
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text("Choose your issue ?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
                     ),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Welcome to our reporting app!",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const SizedBox(
+                height: 10,
               ),
+              // const Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 16),
+              //   child: Text(
+              //     "Welcome to our reporting app!",
+              //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              //   ),
+              // ),
+              // const SizedBox(height: 20),
+              Card(
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(height: 20),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              padding: const EdgeInsets.all(10),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.deepOrange,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(15),
+                color: Colors.red.shade100,
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                    child: SizedBox(
-                      height: 200, // Set a fixed height for the ListView
-                      child: ListView.builder(
-                        itemCount: images.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>pages[index]));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(30),
-                                      border: Border.all(
-                                        color: Colors.black,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(28),
-                                      child: Image.asset(
-                                        images[index],
-                                        width: 150,
-                                        height: 150,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    labels[index],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.warning,
+                        color: Colors.red,
+                        size: 24,
                       ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Warning!',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Any fraudulent activity, such as taking pictures of someone else\'s vehicle intentionally, will result in legal action and consequences.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text("Choose your issue ?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                 ],
               ),
             ),
-          ],
+          ),
+
+
+            ],
+          ),
         ),
       ),
     );

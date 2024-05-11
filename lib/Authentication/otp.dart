@@ -137,8 +137,8 @@ class _OtpState extends State<Otp> {
                 const SizedBox(
                   height: 50,
                 ),
-                // Lottie.asset("assets/lottie/plane.json",
-                //     height: 200, fit: BoxFit.cover),
+                Lottie.asset("assets/lottie/otp.json",
+                    height: 200, fit: BoxFit.cover),
                 const SizedBox(
                   height: 30,
                 ),
@@ -194,7 +194,6 @@ class _OtpState extends State<Otp> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDE6262),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10))),
                       child: const Text("Verify phone number"),
@@ -205,8 +204,7 @@ class _OtpState extends State<Otp> {
                     visible: _canShowCircular,
                     child: const CircularProgressIndicator()
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
                     Visibility(
                       visible: _canShowButton,
