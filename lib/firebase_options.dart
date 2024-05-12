@@ -41,54 +41,54 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB_IVoa7IV0xeSZqddVJcS3Ogb0K0qKyL0',
-    appId: '1:266686473772:web:016edb075255dd36ab9389',
-    messagingSenderId: '266686473772',
-    projectId: 'hackoverflow-2725e',
-    authDomain: 'hackoverflow-2725e.firebaseapp.com',
-    databaseURL: 'https://hackoverflow-2725e-default-rtdb.firebaseio.com',
-    storageBucket: 'hackoverflow-2725e.appspot.com',
-    measurementId: 'G-YZ23K2BBG6',
+    apiKey: 'WEB_API_KEY',
+    appId: 'WEB_APP_ID',
+    messagingSenderId: 'WEB_MESSAGING_SENDER_ID',
+    projectId: 'WEB_PROJECT_ID',
+    authDomain: 'WEB_AUTH_DOMAIN',
+    databaseURL: 'WEB_DATABASE_URL',
+    storageBucket: 'WEB_STORAGE_BUCKET',
+    measurementId: 'WEB_MEASUREMENT_ID',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCywtRm-uGxs4N87yHpjje8cQE7P9s7IKE',
-    appId: '1:266686473772:android:7be166a55c1399a9ab9389',
-    messagingSenderId: '266686473772',
-    projectId: 'hackoverflow-2725e',
-    databaseURL: 'https://hackoverflow-2725e-default-rtdb.firebaseio.com',
-    storageBucket: 'hackoverflow-2725e.appspot.com',
+    apiKey: 'ANDROID_API_KEY',
+    appId: 'ANDROID_APP_ID',
+    messagingSenderId: 'ANDROID_MESSAGING_SENDER_ID',
+    projectId: 'ANDROID_PROJECT_ID',
+    databaseURL: 'ANDROID_DATABASE_URL',
+    storageBucket: 'ANDROID_STORAGE_BUCKET',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA7_khvsZQDQ_m1eV55_Jme_jsYBkDlxdw',
-    appId: '1:266686473772:ios:ba879b772317f353ab9389',
-    messagingSenderId: '266686473772',
-    projectId: 'hackoverflow-2725e',
-    databaseURL: 'https://hackoverflow-2725e-default-rtdb.firebaseio.com',
-    storageBucket: 'hackoverflow-2725e.appspot.com',
-    iosBundleId: 'com.citizenProblems.abondonVehicle',
+    apiKey: 'IOS_API_KEY',
+    appId: 'IOS_APP_ID',
+    messagingSenderId: 'IOS_MESSAGING_SENDER_ID',
+    projectId: 'IOS_PROJECT_ID',
+    databaseURL: 'IOS_DATABASE_URL',
+    storageBucket: 'IOS_STORAGE_BUCKET',
+    iosBundleId: 'IOS_BUNDLE_ID',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA7_khvsZQDQ_m1eV55_Jme_jsYBkDlxdw',
-    appId: '1:266686473772:ios:ba879b772317f353ab9389',
-    messagingSenderId: '266686473772',
-    projectId: 'hackoverflow-2725e',
-    databaseURL: 'https://hackoverflow-2725e-default-rtdb.firebaseio.com',
-    storageBucket: 'hackoverflow-2725e.appspot.com',
-    iosBundleId: 'com.citizenProblems.abondonVehicle',
+    apiKey: 'MACOS_API_KEY',
+    appId: 'MACOS_APP_ID',
+    messagingSenderId: 'MACOS_MESSAGING_SENDER_ID',
+    projectId: 'MACOS_PROJECT_ID',
+    databaseURL: 'MACOS_DATABASE_URL',
+    storageBucket: 'MACOS_STORAGE_BUCKET',
+    iosBundleId: 'MACOS_BUNDLE_ID',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDhG5Uy0Jtx0KOA1gRZ3GEdEXTt3o29YNY',
-    appId: '1:266686473772:web:832b21fbf28da06aab9389',
-    messagingSenderId: '266686473772',
-    projectId: 'hackoverflow-2725e',
-    authDomain: 'hackoverflow-2725e.firebaseapp.com',
-    databaseURL: 'https://hackoverflow-2725e-default-rtdb.firebaseio.com',
-    storageBucket: 'hackoverflow-2725e.appspot.com',
-    measurementId: 'G-8XKR40GEYE',
+    apiKey: 'WINDOWS_API_KEY',
+    appId: 'WINDOWS_APP_ID',
+    messagingSenderId: 'WINDOWS_MESSAGING_SENDER_ID',
+    projectId: 'WINDOWS_PROJECT_ID',
+    authDomain: 'WINDOWS_AUTH_DOMAIN',
+    databaseURL: 'WINDOWS_DATABASE_URL',
+    storageBucket: 'WINDOWS_STORAGE_BUCKET',
+    measurementId: 'WINDOWS_MEASUREMENT_ID',
   );
 
 }
