@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Helpers/NavBar.dart';
+import '../../../helpers/navigation_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Welcome extends StatelessWidget {
@@ -54,16 +54,15 @@ class FadeInIcon extends StatefulWidget {
   final double size;
   final Color color;
 
-  const FadeInIcon({super.key, required this.icon, required this.size, required this.color});
+  const FadeInIcon(
+      {super.key, required this.icon, required this.size, required this.color});
 
   @override
   _FadeInIconState createState() => _FadeInIconState();
-
 }
 
 class _FadeInIconState extends State<FadeInIcon>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -113,7 +112,6 @@ class InformationCollection extends StatefulWidget {
 }
 
 class _InformationCollectionState extends State<InformationCollection> {
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   TextEditingController dateInput = TextEditingController();
@@ -127,12 +125,12 @@ class _InformationCollectionState extends State<InformationCollection> {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   void showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   void initState() {
-
     final User? user = auth.currentUser;
     userid = user!.uid;
     dateInput.text = ""; //set the initial value of text field
@@ -179,40 +177,35 @@ class _InformationCollectionState extends State<InformationCollection> {
                     TextField(
                       controller: nameController,
                       decoration: const InputDecoration(
-                          labelText: 'Name',
-                        border: OutlineInputBorder()
-                      ),
+                          labelText: 'Name', border: OutlineInputBorder()),
                     ),
                     const SizedBox(height: 25),
                     TextField(
                       controller: dateInput,
                       //editing controller of this TextField
                       decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.calendar_today),
-                      labelText: "Enter DOB",
-                        border: OutlineInputBorder(
-
-                        )
-                      ),
+                          prefixIcon: Icon(Icons.calendar_today),
+                          labelText: "Enter DOB",
+                          border: OutlineInputBorder()),
                       readOnly: true,
                       //set it true, so that user will not able to edit text
                       onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(1950),
-                        //DateTime.now() - not to allow to choose before today.
-                        lastDate: DateTime(2100));
+                        DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1950),
+                            //DateTime.now() - not to allow to choose before today.
+                            lastDate: DateTime(2100));
 
-                    if (pickedDate != null) {
-                      //pickedDate output format => 2021-03-10 00:00:00.000
-                      String formattedDate =
-                          DateFormat('yyyy-MM-dd').format(pickedDate);
-                      setState(() {
-                        dateInput.text =
-                            formattedDate; //set output date to TextField value.
-                      });
-                    } else {}
+                        if (pickedDate != null) {
+                          //pickedDate output format => 2021-03-10 00:00:00.000
+                          String formattedDate =
+                              DateFormat('yyyy-MM-dd').format(pickedDate);
+                          setState(() {
+                            dateInput.text =
+                                formattedDate; //set output date to TextField value.
+                          });
+                        } else {}
                       },
                     ),
                     const SizedBox(height: 15),
@@ -226,7 +219,7 @@ class _InformationCollectionState extends State<InformationCollection> {
                           onChanged: (value) {
                             setState(() {
                               male = value!;
-                              if(value){
+                              if (value) {
                                 female = false;
                                 other = false;
                               }
@@ -244,7 +237,7 @@ class _InformationCollectionState extends State<InformationCollection> {
                           onChanged: (value) {
                             setState(() {
                               female = value!;
-                              if(value){
+                              if (value) {
                                 male = false;
                                 other = false;
                               }
@@ -262,7 +255,7 @@ class _InformationCollectionState extends State<InformationCollection> {
                           onChanged: (value) {
                             setState(() {
                               other = value!;
-                              if(value){
+                              if (value) {
                                 male = false;
                                 female = false;
                               }
@@ -278,23 +271,20 @@ class _InformationCollectionState extends State<InformationCollection> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async{
-
-                  if(male == true){
+                onPressed: () async {
+                  if (male == true) {
                     gender = "male";
-                  }else if(female == true){
+                  } else if (female == true) {
                     gender = "female";
-                  }else{
+                  } else {
                     gender = "other";
                   }
 
                   // Get the entered information
                   Map<String, String> user = {
-
-                    "Name":nameController.text,
-                    "DOB":dateInput.text,
-                    "Gender":gender
-
+                    "Name": nameController.text,
+                    "DOB": dateInput.text,
+                    "Gender": gender
                   };
 
                   // Store the information to firebase database
@@ -312,10 +302,16 @@ class _InformationCollectionState extends State<InformationCollection> {
                     prefs.setBool("UserDetails", true);
 
                     // Navigate to the NavBar screen and pass the information
-                    if(mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NavBar(idx: 0,),),);
+                    if (mounted)
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NavBar(
+                            idx: 0,
+                          ),
+                        ),
+                      );
                   }
-
-
                 },
                 child: const Text("Continue"),
               ),

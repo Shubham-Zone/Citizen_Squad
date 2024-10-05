@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:hackingly_new/Pages/CriminalCars.dart';
-import 'package:hackingly_new/Pages/Garbage.dart';
-import 'package:hackingly_new/Pages/PotHolesReport.dart';
+import 'package:hackingly_new/ui/screens/utilities/criminal_cars.dart';
+import 'package:hackingly_new/ui/screens/utilities/garbage.dart';
+import 'package:hackingly_new/ui/screens/utilities/potholes_report.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker package
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences package
-import '../Helpers/Provider.dart';
+import '../../helpers/provider.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 
@@ -18,12 +18,11 @@ class Index extends StatefulWidget {
 }
 
 class _IndexState extends State<Index> {
-
   String userLoc = "";
   double lat = 0.0;
   double lang = 0.0;
   late SharedPreferences prefs; // SharedPreferences instance
-  String userAvatarPath="";
+  String userAvatarPath = "";
 
   @override
   void initState() {
@@ -34,7 +33,8 @@ class _IndexState extends State<Index> {
 
   Future<void> initPrefs() async {
     prefs = await SharedPreferences.getInstance();
-    userAvatarPath = prefs.getString('user_avatar') ?? ''; // Load user's avatar image path
+    userAvatarPath =
+        prefs.getString('user_avatar') ?? ''; // Load user's avatar image path
   }
 
   Future<void> _getAddressFromMap(double lat, double lang) async {
@@ -44,7 +44,7 @@ class _IndexState extends State<Index> {
         Placemark place = placemarks.first;
         setState(() {
           userLoc =
-          '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+              '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
         });
       }
     } catch (e) {
@@ -53,7 +53,6 @@ class _IndexState extends State<Index> {
   }
 
   void getUserLocation() async {
-
     bool serviceEnabled;
     LocationPermission permission;
     Position? position;
@@ -94,9 +93,9 @@ class _IndexState extends State<Index> {
     // Use the location package to get the location with a timeout
     try {
       position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-          forceAndroidLocationManager: true).timeout(
-          const Duration(milliseconds: locationTimeoutMs));
+              desiredAccuracy: LocationAccuracy.high,
+              forceAndroidLocationManager: true)
+          .timeout(const Duration(milliseconds: locationTimeoutMs));
       setState(() {
         lang = position!.longitude;
         lat = position.latitude;
@@ -118,16 +117,23 @@ class _IndexState extends State<Index> {
         }
       }
 
-
       _getAddressFromMap(lat, lang);
     }
   }
 
-  List images = ["assets/images/car.jpeg", "assets/images/garbage.jpeg", "assets/images/potHoles.jpeg"];
+  List images = [
+    "assets/images/car.jpeg",
+    "assets/images/garbage.jpeg",
+    "assets/images/potHoles.jpeg"
+  ];
 
   List labels = ["VEHICLE", "GARBAGE", "POTHOLES"];
 
-  List pages = [const CriminalCars(), const GarbageReport(), const PotHolesReport()];
+  List pages = [
+    const CriminalCars(),
+    const GarbageReport(),
+    const PotHolesReport()
+  ];
 
   Future<void> _pickImageFromGallery() async {
     final ImagePicker _picker = ImagePicker();
@@ -136,10 +142,7 @@ class _IndexState extends State<Index> {
       setState(() {
         userAvatarPath = image.path; // Set the selected image path
       });
-      if (userAvatarPath != null) {
-        prefs.setString('user_avatar', userAvatarPath);
-      }
-
+      prefs.setString('user_avatar', userAvatarPath);
     }
   }
 
@@ -160,11 +163,8 @@ class _IndexState extends State<Index> {
                 margin: const EdgeInsets.only(left: 10, right: 10),
                 decoration: BoxDecoration(
                   color: Colors.deepOrangeAccent.withOpacity(0.4),
-                    border: Border.all(
-                        color: Colors.grey,
-                        width: 2
-                    ),
-                    borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey, width: 2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -172,10 +172,13 @@ class _IndexState extends State<Index> {
                     children: [
                       // User Avatar
                       GestureDetector(
-                        onTap: _pickImageFromGallery, // Call function to pick image from gallery
+                        onTap:
+                            _pickImageFromGallery, // Call function to pick image from gallery
                         child: CircleAvatar(
                           radius: 30,
-                          backgroundImage: userAvatarPath != null && userAvatarPath.isNotEmpty ? FileImage(File(userAvatarPath)) : null,
+                          backgroundImage: userAvatarPath.isNotEmpty
+                              ? FileImage(File(userAvatarPath))
+                              : null,
                           // Show icon when no image is selected
                         ),
                       ),
@@ -185,22 +188,29 @@ class _IndexState extends State<Index> {
                         children: [
                           Text(
                             "Hi, ${userProvider.name}",
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
                           ),
                           const SizedBox(height: 4),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width*0.6,
+                            width: MediaQuery.of(context).size.width * 0.6,
                             child: const Text(
                               "Be a cleanliness activist, not a dirt contributor",
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black  ),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black),
                             ),
                           ),
                           const SizedBox(height: 8),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width*0.6,
+                            width: MediaQuery.of(context).size.width * 0.6,
                             child: Text(
                               "Your Location: ${userLoc.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : userLoc}",
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
                             ),
                           ),
                         ],
@@ -221,18 +231,23 @@ class _IndexState extends State<Index> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 10),
                       child: SizedBox(
                         height: 200, // Set a fixed height for the ListView
                         child: ListView.builder(
                           itemCount: images.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context)=>pages[index]));
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => pages[index]));
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 5),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5),
                                 child: Column(
                                   children: [
                                     Container(
@@ -256,7 +271,8 @@ class _IndexState extends State<Index> {
                                     const SizedBox(height: 5),
                                     Text(
                                       labels[index],
-                                      style: const TextStyle(color: Colors.white),
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     ),
                                   ],
                                 ),
@@ -272,7 +288,11 @@ class _IndexState extends State<Index> {
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Text("Choose your issue ?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+                        child: Text("Choose your issue ?",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22)),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -291,57 +311,54 @@ class _IndexState extends State<Index> {
               // ),
               // const SizedBox(height: 20),
               Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.red.shade100,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.red.shade100,
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.warning,
-                        color: Colors.red,
-                        size: 24,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.warning,
+                            color: Colors.red,
+                            size: 24,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Warning!',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(height: 10),
                       Text(
-                        'Warning!',
+                        'Any fraudulent activity, such as taking pictures of someone else\'s vehicle intentionally, will result in legal action and consequences.',
                         style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black87,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Any fraudulent activity, such as taking pictures of someone else\'s vehicle intentionally, will result in legal action and consequences.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-
-
             ],
           ),
         ),
       ),
     );
   }
-
 }

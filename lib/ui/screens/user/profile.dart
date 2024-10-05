@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Helpers/Provider.dart';
+import '../../../helpers/provider.dart';
 
 class Profile extends StatefulWidget {
-
   const Profile({super.key});
 
   @override
@@ -16,7 +15,6 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
-
     final provider = Provider.of<ReportsProvider>(context);
 
     return Scaffold(
@@ -60,56 +58,56 @@ class _ProfileState extends State<Profile> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () async {
-
               final pickedFile = await ImagePicker().pickImage(
                 source: ImageSource.gallery,
               );
 
               if (pickedFile != null) {
-
                 // Save image path to local storage
-                SharedPreferences prefs =
-                await SharedPreferences.getInstance();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.setString('profileImage', pickedFile.path);
 
                 setState(() {});
-
               }
             },
             style: ElevatedButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.deepOrange, // Text color
             ),
-            child: const Text("Pick from Gallery", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
+            child: const Text(
+              "Pick from Gallery",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.white),
+            ),
           ),
           const SizedBox(height: 16),
           ListTile(
-            title: const Text(
-              "Name",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-            ),
+            title: const Text("Name",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             subtitle: Text(
               provider.name,
               style: const TextStyle(fontSize: 16),
             ),
           ),
-          const Divider(thickness: 1,),
+          const Divider(
+            thickness: 1,
+          ),
           ListTile(
-            title: const Text(
-              "Date of Birth",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-            ),
+            title: const Text("Date of Birth",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             subtitle: Text(
               provider.dob,
               style: const TextStyle(fontSize: 16),
             ),
           ),
-          const Divider(thickness: 1,),
+          const Divider(
+            thickness: 1,
+          ),
           ListTile(
-            title: const Text(
-              "Gender",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
-            ),
+            title: const Text("Gender",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             subtitle: Text(
               provider.gender,
               style: const TextStyle(fontSize: 16),

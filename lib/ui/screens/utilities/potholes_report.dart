@@ -12,8 +12,9 @@ import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
-import '../Helpers/Provider.dart';
-import '../Mongodb/MongoProvider.dart';
+import '../../../helpers/provider.dart';
+import '../../../data/mongodb/mongo_provider.dart';
+
 const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
 
 class PotHolesReport extends StatefulWidget {
@@ -24,7 +25,6 @@ class PotHolesReport extends StatefulWidget {
 }
 
 class _PotHolesReportState extends State<PotHolesReport> {
-
   bool _uploading = false;
 
   // Longitude and latitude of user location
@@ -43,37 +43,38 @@ class _PotHolesReportState extends State<PotHolesReport> {
 
   static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("PotHoles").child(userid);
-
+  DatabaseReference db = FirebaseDatabase.instance
+      .ref()
+      .child("MCB")
+      .child("PotHoles")
+      .child(userid);
 
   // Pick image from the gallery
   Future<void> getImageFromGallery() async {
     final List<XFile> pickedFiles = await picker.pickMultiImage();
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
-        setState(() {
-          if (_images.isEmpty) {
-            _images = pickedFiles.map((file) => File(file.path)).toList();
-          } else {
-            _images.addAll(pickedFiles.map((file) => File(file.path)).toList());
-          }
-        });
-      }
-
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        if (_images.isEmpty) {
+          _images = pickedFiles.map((file) => File(file.path)).toList();
+        } else {
+          _images.addAll(pickedFiles.map((file) => File(file.path)).toList());
+        }
+      });
+    }
   }
 
   // Pick image from camera
   Future<void> getImageFromCamera() async {
     final XFile? pickedFile =
-    await picker.pickImage(source: ImageSource.camera);
+        await picker.pickImage(source: ImageSource.camera);
 
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-          _images.add(_image);
-        });
-      }
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        _images.add(_image);
+      });
+    }
   }
-
 
   // Image picking options
   void showOptions() {
@@ -114,7 +115,7 @@ class _PotHolesReportState extends State<PotHolesReport> {
         Placemark place = placemarks.first;
         setState(() {
           potholeLoc.text =
-          '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+              '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
         });
       }
     } catch (e) {
@@ -163,8 +164,8 @@ class _PotHolesReportState extends State<PotHolesReport> {
     // Use the location package to get the location with a timeout
     try {
       position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-          forceAndroidLocationManager: true)
+              desiredAccuracy: LocationAccuracy.high,
+              forceAndroidLocationManager: true)
           .timeout(const Duration(milliseconds: locationTimeoutMs));
       setState(() {
         lang = position!.longitude;
@@ -223,7 +224,6 @@ class _PotHolesReportState extends State<PotHolesReport> {
 
   // Function to submit report
   void submitReport(BuildContext context) async {
-
     setState(() {
       _uploading = true;
     });
@@ -235,7 +235,12 @@ class _PotHolesReportState extends State<PotHolesReport> {
     // pic=file!.path;
     // if (_image.path.isEmpty) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please upload images of garbage"), backgroundColor: Colors.red,), );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please upload images of garbage"),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -243,10 +248,10 @@ class _PotHolesReportState extends State<PotHolesReport> {
 
     //store the file
     try {
-
-      for(var imageFile in _images){
+      for (var imageFile in _images) {
         //unique id
-        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        String uniqueFileName =
+            DateTime.now().millisecondsSinceEpoch.toString();
         //get the ref to storage root
         Reference refenceroot = FirebaseStorage.instance.ref();
         //create a ref for the image to be stored
@@ -256,8 +261,6 @@ class _PotHolesReportState extends State<PotHolesReport> {
         String imgUrl = await refImgtoUpload.getDownloadURL();
         imageUrls.add(imgUrl);
       }
-
-
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -268,13 +271,15 @@ class _PotHolesReportState extends State<PotHolesReport> {
     final mongoProvider = Provider.of<MongoProvider>(context, listen: false);
 
     Map<String, dynamic> data = {
-      "_id":mongo.ObjectId().oid,
+      "_id": mongo.ObjectId().oid,
       "imageUrl": imageUrls,
-      "location": potholeLoc.text.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : potholeLoc.text,
+      "location": potholeLoc.text.isEmpty
+          ? "P.I.E.T - Panipat Institute of Engineering & Technology"
+          : potholeLoc.text,
       "lang": "77.0138832",
       "lat": "29.2110672",
       "suggestion": suggestion.text,
-      "status":"0"
+      "status": "0"
     };
 
     mongoProvider.setReport(data);
@@ -282,7 +287,7 @@ class _PotHolesReportState extends State<PotHolesReport> {
     db.push().set(data);
 
     setState(() {
-      _image=File("");
+      _image = File("");
       _images.clear();
       imageUrls.clear();
       _uploading = false;
@@ -290,8 +295,11 @@ class _PotHolesReportState extends State<PotHolesReport> {
     });
 
     // rto.push().set(data);
-    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly"), backgroundColor: Colors.green,));
-
+    if (mounted)
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(" Reports Submitted Successfuly"),
+        backgroundColor: Colors.green,
+      ));
   }
 
   @override
@@ -323,7 +331,8 @@ class _PotHolesReportState extends State<PotHolesReport> {
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         "Pothole Images",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                     ),
                     const SizedBox(
@@ -335,66 +344,70 @@ class _PotHolesReportState extends State<PotHolesReport> {
                       },
                       child: _images.isEmpty
                           ? Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.camera_alt,
-                                size: 40,
-                              ),
-                              Text('Tap to add image')
-                            ],
-                          ),
-                        ),
-                      )
-                          : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: _images.map((image) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ClipRRect(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(12.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors
-                                          .grey, // Choose your border color
-                                      width:
-                                      2.0, // Choose the width of the border
+                              ),
+                              child: const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.camera_alt,
+                                      size: 40,
                                     ),
-                                    borderRadius: BorderRadius.circular(
-                                        12.0), // Choose the border radius
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Same as border radius
-                                    child: Image.file(
-                                      image,
-                                      width: 250,
-                                      height: 250,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                    Text('Tap to add image')
+                                  ],
                                 ),
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
+                            )
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: _images.map((image) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors
+                                                .grey, // Choose your border color
+                                            width:
+                                                2.0, // Choose the width of the border
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                              12.0), // Choose the border radius
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Same as border radius
+                                          child: Image.file(
+                                            image,
+                                            width: 250,
+                                            height: 250,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
                     ),
                     const SizedBox(
                       height: 5,
                     ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                      child: Text(
+                        "Select location",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
                     ),
                     const SizedBox(
                       height: 10,
@@ -410,7 +423,7 @@ class _PotHolesReportState extends State<PotHolesReport> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide:
-                          const BorderSide(color: Colors.teal, width: 2),
+                              const BorderSide(color: Colors.teal, width: 2),
                         ),
                       ),
                     ),
@@ -431,7 +444,7 @@ class _PotHolesReportState extends State<PotHolesReport> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide:
-                          const BorderSide(color: Colors.teal, width: 2),
+                              const BorderSide(color: Colors.teal, width: 2),
                         ),
                       ),
                     ),

@@ -7,18 +7,17 @@ class PatientRecord {
   String dateOfBirth;
   String gender;
 
-  PatientRecord({required this.name, required this.dateOfBirth, required this.gender});
-
+  PatientRecord(
+      {required this.name, required this.dateOfBirth, required this.gender});
 }
 
 class ReportsProvider extends ChangeNotifier {
-
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  static DatabaseReference db = FirebaseDatabase.instance.ref().child("Users").child(userid);
-
+  static DatabaseReference db =
+      FirebaseDatabase.instance.ref().child("Users").child(userid);
 
   String name = "";
   String gender = "";
@@ -36,10 +35,10 @@ class ReportsProvider extends ChangeNotifier {
 
   String greet = "";
 
-  void greeting(){
-    if(DateTime.now().hour < 12){
+  void greeting() {
+    if (DateTime.now().hour < 12) {
       greet = "Good morning";
-    } else if(DateTime.now().hour >= 12 && DateTime.now().hour < 17){
+    } else if (DateTime.now().hour >= 12 && DateTime.now().hour < 17) {
       greet = "Good afternoon";
     } else {
       greet = "Good night";
@@ -58,6 +57,4 @@ class ReportsProvider extends ChangeNotifier {
     // Placeholder method for logout
     // You can implement your logout logic here
   }
-
-
 }

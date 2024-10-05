@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hackingly_new/Pages/index.dart';
 import 'package:provider/provider.dart';
-import 'Authentication/otp.dart';
-import 'Helpers/Provider.dart';
-import 'Mongodb/MongoProvider.dart';
-import 'Pages/SplashScreen.dart';
+import 'helpers/provider.dart';
+import 'data/mongodb/mongo_provider.dart';
+import 'ui/screens/auth/splash_screen.dart';
 import 'firebase_options.dart';
-import 'Authentication/Phone.dart';
 
 void main() async {
   // Connect to MongoDB
   await MongoProvider().connectToMongo();
 
   WidgetsFlutterBinding.ensureInitialized();
-
 
   if (Firebase.apps.isNotEmpty) {
     // The Firebase app has already been initialized, so don't initialize it again.

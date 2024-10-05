@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hackingly_new/ui/screens/user/home_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Pages/Welcome.dart';
-import 'Phone.dart';
+import 'phone_auth.dart';
 
 class Otp extends StatefulWidget {
   const Otp({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class Otp extends StatefulWidget {
 }
 
 class _OtpState extends State<Otp> {
-
   // late String? nameStatus="";
   // late DatabaseReference dbRef;
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -32,14 +31,14 @@ class _OtpState extends State<Otp> {
     const oneSec = Duration(seconds: 1);
     _timer = Timer.periodic(
         oneSec,
-            (Timer timer) => setState(() {
-          if (_start == 0) {
-            timer.cancel();
-            showResendBtn();
-          } else {
-            _start = _start - 1;
-          }
-        }));
+        (Timer timer) => setState(() {
+              if (_start == 0) {
+                timer.cancel();
+                showResendBtn();
+              } else {
+                _start = _start - 1;
+              }
+            }));
   }
 
   @override
@@ -55,45 +54,42 @@ class _OtpState extends State<Otp> {
     super.dispose();
   }
 
-
-
-  TextEditingController smscode=TextEditingController();
+  TextEditingController smscode = TextEditingController();
 
   bool _canShowButton = true;
   bool _canShowCircular = false;
 
-  bool resendText=true;
-  bool resendBtn=false;
+  bool resendText = true;
+  bool resendBtn = false;
 
-  showResendBtn(){
-    resendText=!resendText;
-    resendBtn=!resendBtn;
+  showResendBtn() {
+    resendText = !resendText;
+    resendBtn = !resendBtn;
   }
 
   void hideWidget() {
     setState(() {
       _canShowButton = !_canShowButton;
-      _canShowCircular=!_canShowCircular;
+      _canShowCircular = !_canShowCircular;
     });
   }
 
   void showWidget() {
     setState(() {
       _canShowButton = true;
-      _canShowCircular=false;
+      _canShowCircular = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
-    var mediaquery=MediaQuery.of(context);
+    var mediaquery = MediaQuery.of(context);
 
     final defaultPinTheme = PinTheme(
-      width: mediaquery.size.width*0.055,
-      height: mediaquery.size.height*0.056,
+      width: mediaquery.size.width * 0.055,
+      height: mediaquery.size.height * 0.056,
       textStyle: TextStyle(
-          fontSize: mediaquery.size.height*0.025,
+          fontSize: mediaquery.size.height * 0.025,
           color: const Color.fromRGBO(30, 60, 87, 1),
           fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
@@ -118,17 +114,15 @@ class _OtpState extends State<Otp> {
     var code = "";
 
     return WillPopScope(
-
       onWillPop: () async {
         return false;
       },
-
       child: Scaffold(
         extendBodyBehindAppBar: true,
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Container(
-            margin:const EdgeInsets.only(left: 25, right: 25,top: 80),
+            margin: const EdgeInsets.only(left: 25, right: 25, top: 80),
             alignment: Alignment.center,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -177,20 +171,30 @@ class _OtpState extends State<Otp> {
                       onPressed: () async {
                         hideWidget();
                         try {
-                          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: Phone.verify, smsCode: smscode.text);
+                          PhoneAuthCredential credential =
+                              PhoneAuthProvider.credential(
+                                  verificationId: Phone.verify,
+                                  smsCode: smscode.text);
                           // Sign the user in (or link) with the credential
                           await auth.signInWithCredential(credential);
                           //saving login info to sharedpref
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('repeat', true);
 
-                          if(mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Welcome()));
-
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Welcome()));
+                          }
                         } catch (e) {
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('repeat', false);
                           showWidget();
-                          if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()+code)));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString() + code)));
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -202,8 +206,7 @@ class _OtpState extends State<Otp> {
                 ),
                 Visibility(
                     visible: _canShowCircular,
-                    child: const CircularProgressIndicator()
-                ),
+                    child: const CircularProgressIndicator()),
                 Column(
                   children: [
                     Visibility(
@@ -212,8 +215,10 @@ class _OtpState extends State<Otp> {
                         children: [
                           TextButton(
                               onPressed: () {
-                                Navigator.pushReplacement(context,
-                                    MaterialPageRoute(builder: (context) => const Phone()));
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Phone()));
                               },
                               child: const Text(
                                 "Edit Phone Number ?",
@@ -222,64 +227,58 @@ class _OtpState extends State<Otp> {
                         ],
                       ),
                     ),
-
                     Visibility(
                       visible: resendText,
                       child: Row(
                         children: [
                           TextButton(
-                              onPressed: () {
-
-                              },
-                              child:  Text(
+                              onPressed: () {},
+                              child: Text(
                                 "Resend otp in $_start sec",
                                 style: const TextStyle(color: Colors.black),
                               )),
                         ],
                       ),
                     ),
-
                     Visibility(
                       visible: resendBtn,
                       child: ElevatedButton(
                           onPressed: () async {
-
                             final prefs = await SharedPreferences.getInstance();
                             int? phNo = prefs.getInt('phoneNo');
 
                             await FirebaseAuth.instance.verifyPhoneNumber(
                               phoneNumber: "+91$phNo",
-                              verificationCompleted: (PhoneAuthCredential credential) {},
+                              verificationCompleted:
+                                  (PhoneAuthCredential credential) {},
                               verificationFailed: (FirebaseAuthException e) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())));
                                 showWidget();
                               },
-                              codeSent: (String verificationId, int? resendToken) async {
-                                Phone.verify= verificationId;
+                              codeSent: (String verificationId,
+                                  int? resendToken) async {
+                                Phone.verify = verificationId;
                               },
-                              codeAutoRetrievalTimeout: (String verificationId) {},
+                              codeAutoRetrievalTimeout:
+                                  (String verificationId) {},
                             );
 
                             setState(() {
                               showResendBtn();
                               startTimer();
-                              _start=30;
+                              _start = 30;
                             });
-
                           },
-                          child: const Text("Resend otp")
-                      ),
+                          child: const Text("Resend otp")),
                     )
                   ],
                 )
-
               ],
             ),
           ),
         ),
       ),
-
     );
-
   }
 }
