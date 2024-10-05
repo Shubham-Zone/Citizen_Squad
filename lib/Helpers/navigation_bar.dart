@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../ui/screens/user/profile.dart';
-import '../screen/index.dart';
+import '../ui/components/index.dart';
 import '../ui/screens/utilities/tracking.dart';
 
 class NavBar extends StatefulWidget {
