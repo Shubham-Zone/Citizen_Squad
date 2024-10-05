@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:hackingly_new/Helpers/Provider.dart';
 import 'package:hackingly_new/ui/screens/utilities/criminal_cars.dart';
 import 'package:hackingly_new/ui/screens/utilities/garbage.dart';
 import 'package:hackingly_new/ui/screens/utilities/potholes_report.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker package
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences package
-import '../../helpers/provider.dart';
+
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 
