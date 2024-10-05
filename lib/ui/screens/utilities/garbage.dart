@@ -11,11 +11,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import '../Helpers/Provider.dart';
-import '../Mongodb/MongoProvider.dart';
+import '../../../helpers/provider.dart';
+import '../../../data/mongodb/mongo_provider.dart';
 
 const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
-
 
 class GarbageReport extends StatefulWidget {
   const GarbageReport({super.key});
@@ -25,7 +24,6 @@ class GarbageReport extends StatefulWidget {
 }
 
 class _GarbageReportState extends State<GarbageReport> {
-
   bool _uploading = false;
 
   // Longitude and latitude of user location
@@ -38,42 +36,42 @@ class _GarbageReportState extends State<GarbageReport> {
   late File _image = File('');
   List<File> _images = [];
   final picker = ImagePicker();
-  File? _numberPlate;
 
   // Image url from firebase storage
   String imageUrl = "";
 
   static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("Garbage").child(userid);
-
+  DatabaseReference db = FirebaseDatabase.instance
+      .ref()
+      .child("MCB")
+      .child("Garbage")
+      .child(userid);
 
   // Pick image from the gallery
   Future<void> getImageFromGallery(bool numb) async {
     final List<XFile> pickedFiles = await picker.pickMultiImage();
 
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
-        setState(() {
-          if (_images.isEmpty) {
-            _images = pickedFiles.map((file) => File(file.path)).toList();
-          } else {
-            _images.addAll(pickedFiles.map((file) => File(file.path)).toList());
-          }
-        });
-
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        if (_images.isEmpty) {
+          _images = pickedFiles.map((file) => File(file.path)).toList();
+        } else {
+          _images.addAll(pickedFiles.map((file) => File(file.path)).toList());
+        }
+      });
     }
   }
 
   // Pick image from camera
   Future<void> getImageFromCamera(bool numb) async {
-
-      final XFile? pickedFile =
-      await picker.pickImage(source: ImageSource.camera);
-      if (pickedFile != null) {
-        setState(() {
-          _image = File(pickedFile.path);
-          _images.add(_image);
-        });
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+        _images.add(_image);
+      });
     }
   }
 
@@ -225,7 +223,6 @@ class _GarbageReportState extends State<GarbageReport> {
 
   // Function to submit report
   void submitReport(BuildContext context) async {
-
     setState(() {
       _uploading = true;
     });
@@ -237,7 +234,10 @@ class _GarbageReportState extends State<GarbageReport> {
     // pic=file!.path;
     // if (_image.path.isEmpty) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please upload images of garbage"), backgroundColor: Colors.red,));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please upload images of garbage"),
+        backgroundColor: Colors.red,
+      ));
       return;
     }
 
@@ -245,10 +245,10 @@ class _GarbageReportState extends State<GarbageReport> {
 
     //store the file
     try {
-
-      for(var imageFile in _images){
+      for (var imageFile in _images) {
         //unique id
-        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        String uniqueFileName =
+            DateTime.now().millisecondsSinceEpoch.toString();
         //get the ref to storage root
         Reference refenceroot = FirebaseStorage.instance.ref();
         //create a ref for the image to be stored
@@ -258,8 +258,6 @@ class _GarbageReportState extends State<GarbageReport> {
         String imgUrl = await refImgtoUpload.getDownloadURL();
         imageUrls.add(imgUrl);
       }
-
-
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -270,13 +268,15 @@ class _GarbageReportState extends State<GarbageReport> {
     final mongoProvider = Provider.of<MongoProvider>(context, listen: false);
 
     Map<String, dynamic> data = {
-      "_id":mongo.ObjectId().oid,
+      "_id": mongo.ObjectId().oid,
       "imageUrl": imageUrls,
-      "location": garbageLoc.text.isEmpty ? "P.I.E.T - Panipat Institute of Engineering & Technology" : garbageLoc.text,
+      "location": garbageLoc.text.isEmpty
+          ? "P.I.E.T - Panipat Institute of Engineering & Technology"
+          : garbageLoc.text,
       "lang": "77.0138832",
       "lat": "29.2110672",
       "suggestion": suggestion.text,
-      "status":"0"
+      "status": "0"
     };
 
     mongoProvider.setReport(data);
@@ -284,22 +284,23 @@ class _GarbageReportState extends State<GarbageReport> {
     db.push().set(data);
 
     setState(() {
-      _image=File("");
+      _image = File("");
       _images.clear();
       imageUrls.clear();
       _uploading = false;
-      _numberPlate = File("");
       suggestion.clear();
     });
 
     // rto.push().set(data);
-    if(mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(" Reports Submitted Successfuly"), backgroundColor: Colors.green,));
-
+    if (mounted)
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(" Reports Submitted Successfuly"),
+        backgroundColor: Colors.green,
+      ));
   }
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<ReportsProvider>(context);
 
     userProvider.getUserDetail();
@@ -312,163 +313,165 @@ class _GarbageReportState extends State<GarbageReport> {
         backgroundColor: Colors.orangeAccent,
       ),
       body: SafeArea(
-        child: Stack(
-          children:[
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(
-                      height: 10,
+        child: Stack(children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      "Garbage Images",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        "Garbage Images",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        showOptions(false);
-                      },
-                      child: _images.isEmpty
-                          ? Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.camera_alt,
-                                size: 40,
-                              ),
-                              Text('Tap to add image')
-                            ],
-                          ),
-                        ),
-                      )
-                          : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: _images.map((image) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors
-                                          .grey, // Choose your border color
-                                      width:
-                                      2.0, // Choose the width of the border
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                        12.0), // Choose the border radius
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showOptions(false);
+                    },
+                    child: _images.isEmpty
+                        ? Container(
+                            height: 200,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.camera_alt,
+                                    size: 40,
                                   ),
+                                  Text('Tap to add image')
+                                ],
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _images.map((image) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        10.0), // Same as border radius
-                                    child: Image.file(
-                                      image,
-                                      width: 250,
-                                      height: 250,
-                                      fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors
+                                              .grey, // Choose your border color
+                                          width:
+                                              2.0, // Choose the width of the border
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                            12.0), // Choose the border radius
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                            10.0), // Same as border radius
+                                        child: Image.file(
+                                          image,
+                                          width: 250,
+                                          height: 250,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      "Select location",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
+                    controller: garbageLoc,
+                    decoration: InputDecoration(
+                      labelText: 'Garbage Location',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: Colors.teal),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide:
+                            const BorderSide(color: Colors.teal, width: 2),
                       ),
                     ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text("Select location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextField(
-                      controller: garbageLoc,
-                      decoration: InputDecoration(
-                        labelText: 'Garbage Location',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: Colors.teal),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide:
-                          const BorderSide(color: Colors.teal, width: 2),
-                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: selectLocation,
+                    child: const Text('Select Location'),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: suggestion,
+                    decoration: InputDecoration(
+                      labelText: 'Suggestion',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: Colors.teal),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide:
+                            const BorderSide(color: Colors.teal, width: 2),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: selectLocation,
-                      child: const Text('Select Location'),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: suggestion,
-                      decoration: InputDecoration(
-                        labelText: 'Suggestion',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: Colors.teal),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide:
-                          const BorderSide(color: Colors.teal, width: 2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => submitReport(context),
-                      child: const Text('Submit Report'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => submitReport(context),
+                    child: const Text('Submit Report'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_uploading)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      "Please wait...",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
               ),
             ),
-            if (_uploading)
-              Container(
-                color: Colors.black.withOpacity(0.5),
-                child: const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text(
-                        "Please wait...",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ]
-        ),
+        ]),
       ),
     );
   }
-
 }

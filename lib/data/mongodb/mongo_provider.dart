@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'Constants.dart';
-import 'ReportsModel.dart';
+import 'constants.dart';
+import 'reports.dart';
 
 class MongoProvider extends ChangeNotifier {
-
   static Db? _db;
   static late DbCollection _collection;
 
@@ -35,6 +34,4 @@ class MongoProvider extends ChangeNotifier {
     }
     return reportList;
   }
-
-
 }

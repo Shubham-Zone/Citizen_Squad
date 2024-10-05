@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -24,7 +23,8 @@ class _RtoAdminState extends State<RtoAdmin> {
         stream: rto.onValue,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            Map<dynamic, dynamic> map = snapshot.data!.snapshot.value as dynamic;
+            Map<dynamic, dynamic> map =
+                snapshot.data!.snapshot.value as dynamic;
             List<dynamic> userIds = map.keys.toList();
 
             return ListView.builder(
@@ -40,7 +40,7 @@ class _RtoAdminState extends State<RtoAdmin> {
                     Map<dynamic, dynamic> carDetails = userDetails[carKey];
 
                     List<String> imgUrls =
-                    List<String>.from(carDetails["imageUrl"] ?? []);
+                        List<String>.from(carDetails["imageUrl"] ?? []);
 
                     return Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -99,7 +99,7 @@ class _RtoAdminState extends State<RtoAdmin> {
                                             appBar: AppBar(),
                                             body: PhotoView(
                                               imageProvider:
-                                              NetworkImage(imageUrl),
+                                                  NetworkImage(imageUrl),
                                             ),
                                           ),
                                         ),

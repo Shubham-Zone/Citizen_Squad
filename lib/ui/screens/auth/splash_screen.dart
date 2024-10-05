@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Authentication/Phone.dart';
-import '../Helpers/NavBar.dart';
-import 'Welcome.dart';
+import '../../../authentication/phone_auth.dart';
+import '../../../helpers/navigation_bar.dart';
+import '../user/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
-
     super.initState();
 
     _animationController = AnimationController(
@@ -42,18 +41,24 @@ class _SplashScreenState extends State<SplashScreen>
       final bool? repeat = prefs.getBool('repeat');
       final bool? userDetails = prefs.getBool("UserDetails");
       if (repeat == true) {
-        if(userDetails == true){
-          if(mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>const NavBar(idx: 0)));
-        }else{
-
-          if(mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>const Welcome()));
-
+        if (userDetails == true) {
+          if (mounted) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const NavBar(idx: 0)));
+          }
+        } else {
+          if (mounted) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const Welcome()));
+          }
         }
       } else {
-        if(mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Phone()));
+        if (mounted) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const Phone()));
+        }
       }
-  });
-
+    });
   }
 
   @override

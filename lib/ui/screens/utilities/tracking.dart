@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Track extends StatefulWidget {
   const Track({Key? key}) : super(key: key);
@@ -37,7 +36,8 @@ class _TrackState extends State<Track> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: _selectedIndex == 0 ? Colors.deepOrangeAccent : null,
+                    backgroundColor:
+                        _selectedIndex == 0 ? Colors.deepOrangeAccent : null,
                   ),
                   child: const Text("Vehicles"),
                 ),
@@ -48,7 +48,8 @@ class _TrackState extends State<Track> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: _selectedIndex == 1 ? Colors.deepOrangeAccent : null,
+                    backgroundColor:
+                        _selectedIndex == 1 ? Colors.deepOrangeAccent : null,
                   ),
                   child: const Text("Garbage"),
                 ),
@@ -59,7 +60,8 @@ class _TrackState extends State<Track> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: _selectedIndex == 2 ? Colors.deepOrangeAccent : null,
+                    backgroundColor:
+                        _selectedIndex == 2 ? Colors.deepOrangeAccent : null,
                   ),
                   child: const Text("PotHoles"),
                 ),
@@ -81,10 +83,9 @@ class Vehicles extends StatefulWidget {
 }
 
 class _VehiclesState extends State<Vehicles> {
-
   static String userId = FirebaseAuth.instance.currentUser!.uid;
-  DatabaseReference db = FirebaseDatabase.instance.ref().child("RTO").child(userId);
-
+  DatabaseReference db =
+      FirebaseDatabase.instance.ref().child("RTO").child(userId);
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +97,8 @@ class _VehiclesState extends State<Vehicles> {
         stream: db.onValue,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            Map<dynamic, dynamic>? map = snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
+            Map<dynamic, dynamic>? map =
+                snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
 
             if (map != null) {
               List<dynamic> list = map.values.toList();
@@ -104,7 +106,8 @@ class _VehiclesState extends State<Vehicles> {
               return ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (context, index) {
-                  List<String> imgUrls = List<String>.from(list[index]["imageUrl"] ?? []);
+                  List<String> imgUrls =
+                      List<String>.from(list[index]["imageUrl"] ?? []);
                   String status = list[index]["status"];
 
                   return Padding(
@@ -120,7 +123,6 @@ class _VehiclesState extends State<Vehicles> {
                         children: [
                           Container(
                             decoration: BoxDecoration(
-
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(20),
                                 topRight: Radius.circular(20),
@@ -164,7 +166,8 @@ class _VehiclesState extends State<Vehicles> {
                                         builder: (context) => Scaffold(
                                           appBar: AppBar(),
                                           body: PhotoView(
-                                            imageProvider: NetworkImage(imageUrl),
+                                            imageProvider:
+                                                NetworkImage(imageUrl),
                                           ),
                                         ),
                                       ),
@@ -240,18 +243,24 @@ class _VehiclesState extends State<Vehicles> {
                                     width: 30,
                                     decoration: BoxDecoration(
                                         color: Colors.green,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: const Icon(Icons.check, color: Colors.white),
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: const Icon(Icons.check,
+                                        color: Colors.white),
                                   ),
-                                  const SizedBox(height:1,),
-                                  const Text("Received", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Received",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="1" || status == "2") ? Colors.green : Colors.grey,
+                                color: (status == "1" || status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -259,19 +268,29 @@ class _VehiclesState extends State<Vehicles> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "1" || status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "1" || status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "1" || status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "1" || status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Processing", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Processing",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="2") ? Colors.green : Colors.grey,
+                                color: (status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -279,18 +298,25 @@ class _VehiclesState extends State<Vehicles> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Action", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Action",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                             ],
                           )
-
                         ],
                       ),
                     ),
@@ -298,15 +324,17 @@ class _VehiclesState extends State<Vehicles> {
                 },
               );
             }
-          }
-          else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
-          }
-          else if (snapshot.connectionState == ConnectionState.waiting) {
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-          else if(!snapshot.data!.snapshot.exists){
-            return const Center(child: Text("No data found", style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),),);
+          } else if (!snapshot.data!.snapshot.exists) {
+            return const Center(
+              child: Text(
+                "No data found",
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),
+              ),
+            );
           }
           return const Center(child: CircularProgressIndicator());
         },
@@ -323,10 +351,13 @@ class Garbage extends StatefulWidget {
 }
 
 class _GarbageState extends State<Garbage> {
-
   static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("Garbage").child(userid);
+  DatabaseReference db = FirebaseDatabase.instance
+      .ref()
+      .child("MCB")
+      .child("Garbage")
+      .child(userid);
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +369,8 @@ class _GarbageState extends State<Garbage> {
         stream: db.onValue,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            Map<dynamic, dynamic>? map = snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
+            Map<dynamic, dynamic>? map =
+                snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
 
             if (map != null) {
               List<dynamic> list = map.values.toList();
@@ -346,7 +378,8 @@ class _GarbageState extends State<Garbage> {
               return ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (context, index) {
-                  List<String> imgUrls = List<String>.from(list[index]["imageUrl"] ?? []);
+                  List<String> imgUrls =
+                      List<String>.from(list[index]["imageUrl"] ?? []);
                   String status = list[index]["status"];
 
                   return Padding(
@@ -374,7 +407,8 @@ class _GarbageState extends State<Garbage> {
                                         builder: (context) => Scaffold(
                                           appBar: AppBar(),
                                           body: PhotoView(
-                                            imageProvider: NetworkImage(imageUrl),
+                                            imageProvider:
+                                                NetworkImage(imageUrl),
                                           ),
                                         ),
                                       ),
@@ -450,18 +484,24 @@ class _GarbageState extends State<Garbage> {
                                     width: 30,
                                     decoration: BoxDecoration(
                                         color: Colors.green,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: const Icon(Icons.check, color: Colors.white),
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: const Icon(Icons.check,
+                                        color: Colors.white),
                                   ),
-                                  const SizedBox(height:1,),
-                                  const Text("Received", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Received",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="1" || status == "2") ? Colors.green : Colors.grey,
+                                color: (status == "1" || status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -469,19 +509,29 @@ class _GarbageState extends State<Garbage> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "1" || status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "1" || status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "1" || status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "1" || status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Processing", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Processing",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="2") ? Colors.green : Colors.grey,
+                                color: (status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -489,18 +539,25 @@ class _GarbageState extends State<Garbage> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Action", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Action",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                             ],
                           )
-
                         ],
                       ),
                     ),
@@ -508,15 +565,17 @@ class _GarbageState extends State<Garbage> {
                 },
               );
             }
-          }
-          else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
-          }
-          else if (snapshot.connectionState == ConnectionState.waiting) {
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-          else if(!snapshot.data!.snapshot.exists){
-            return const Center(child: Text("No data found", style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),),);
+          } else if (!snapshot.data!.snapshot.exists) {
+            return const Center(
+              child: Text(
+                "No data found",
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),
+              ),
+            );
           }
           return const Center(child: CircularProgressIndicator());
         },
@@ -533,10 +592,13 @@ class PotHoles extends StatefulWidget {
 }
 
 class _PotHolesState extends State<PotHoles> {
-
   static String userid = FirebaseAuth.instance.currentUser!.uid;
 
-  DatabaseReference db = FirebaseDatabase.instance.ref().child("MCB").child("PotHoles").child(userid);
+  DatabaseReference db = FirebaseDatabase.instance
+      .ref()
+      .child("MCB")
+      .child("PotHoles")
+      .child(userid);
 
   @override
   Widget build(BuildContext context) {
@@ -548,7 +610,8 @@ class _PotHolesState extends State<PotHoles> {
         stream: db.onValue,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            Map<dynamic, dynamic>? map = snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
+            Map<dynamic, dynamic>? map =
+                snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
 
             if (map != null) {
               List<dynamic> list = map.values.toList();
@@ -556,7 +619,8 @@ class _PotHolesState extends State<PotHoles> {
               return ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (context, index) {
-                  List<String> imgUrls = List<String>.from(list[index]["imageUrl"] ?? []);
+                  List<String> imgUrls =
+                      List<String>.from(list[index]["imageUrl"] ?? []);
                   String status = list[index]["status"];
 
                   return Padding(
@@ -584,7 +648,8 @@ class _PotHolesState extends State<PotHoles> {
                                         builder: (context) => Scaffold(
                                           appBar: AppBar(),
                                           body: PhotoView(
-                                            imageProvider: NetworkImage(imageUrl),
+                                            imageProvider:
+                                                NetworkImage(imageUrl),
                                           ),
                                         ),
                                       ),
@@ -660,18 +725,24 @@ class _PotHolesState extends State<PotHoles> {
                                     width: 30,
                                     decoration: BoxDecoration(
                                         color: Colors.green,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: const Icon(Icons.check, color: Colors.white),
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: const Icon(Icons.check,
+                                        color: Colors.white),
                                   ),
-                                  const SizedBox(height:1,),
-                                  const Text("Received", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Received",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="1" || status == "2") ? Colors.green : Colors.grey,
+                                color: (status == "1" || status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -679,19 +750,29 @@ class _PotHolesState extends State<PotHoles> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "1" || status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "1" || status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "1" || status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "1" || status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Processing", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Processing",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                               Container(
                                 width: 60,
                                 height: 6,
-                                color: (status=="2") ? Colors.green : Colors.grey,
+                                color: (status == "2")
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                               Column(
                                 children: [
@@ -699,18 +780,25 @@ class _PotHolesState extends State<PotHoles> {
                                     height: 30,
                                     width: 30,
                                     decoration: BoxDecoration(
-                                        color: (status == "2") ? Colors.green : Colors.grey,
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: (status == "2") ? const Icon(Icons.check, color: Colors.white) : null,
+                                        color: (status == "2")
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    child: (status == "2")
+                                        ? const Icon(Icons.check,
+                                            color: Colors.white)
+                                        : null,
                                   ),
-                                  const SizedBox(height: 1,),
-                                  const Text("Action", style: TextStyle(color: Colors.green)),
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  const Text("Action",
+                                      style: TextStyle(color: Colors.green)),
                                 ],
                               ),
                             ],
                           )
-
                         ],
                       ),
                     ),
@@ -718,15 +806,17 @@ class _PotHolesState extends State<PotHoles> {
                 },
               );
             }
-          }
-          else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text(snapshot.error.toString()));
-          }
-          else if (snapshot.connectionState == ConnectionState.waiting) {
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-          else if(!snapshot.data!.snapshot.exists){
-            return const Center(child: Text("No data found", style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),),);
+          } else if (!snapshot.data!.snapshot.exists) {
+            return const Center(
+              child: Text(
+                "No data found",
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 20),
+              ),
+            );
           }
           return const Center(child: CircularProgressIndicator());
         },
