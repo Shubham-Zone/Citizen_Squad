@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hackingly_new/data/mongodb/mongo_provider.dart';
+import 'package:hackingly_new/data/mongodb/reports.dart';
 import 'package:provider/provider.dart';
-import '../../../data/mongodb/mongo_provider.dart';
-import '../../../data/mongodb/reports.dart';
 
 class Reports extends StatelessWidget {
   const Reports({super.key});

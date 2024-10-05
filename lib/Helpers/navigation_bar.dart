@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../ui/screens/user/profile.dart';
-import '../ui/components/index.dart';
-import '../ui/screens/utilities/tracking.dart';
+import 'package:hackingly_new/ui/components/index.dart';
+import 'package:hackingly_new/ui/screens/user/profile.dart';
+import 'package:hackingly_new/ui/screens/utilities/tracking.dart';
 
 class NavBar extends StatefulWidget {
   final int idx;
