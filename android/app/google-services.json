@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "PROJECT_NUMBER",
-    "firebase_url": "FIREBASE_URL",
-    "project_id": "PROJECT_ID",
-    "storage_bucket": "STORAGE_BUCKET"
+    "project_number": "123456789012",
+    "firebase_url": "https://dummy-project.firebaseio.com",
+    "project_id": "dummy-project",
+    "storage_bucket": "dummy-project.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "MOBILESDK_APP_ID",
+        "mobilesdk_app_id": "1:123456789012:android:abcdef123456",
         "android_client_info": {
-          "package_name": "PACKAGE_NAME"
+          "package_name": "com.open_innov.hackingly_new" 
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "API_KEY"
+          "current_key": "dummy_api_key" 
         }
       ],
       "services": {
@@ -26,5 +26,5 @@
       }
     }
   ],
-  "configuration_version": "CONFIGURATION_VERSION"
+  "configuration_version": "1"
 }
