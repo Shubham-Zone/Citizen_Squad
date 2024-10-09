@@ -43,6 +43,32 @@ If you're new to Flutter or contributing to open-source projects, follow these s
     ```bash
     flutter run
     ```
+    ## Troubleshooting
+
+If you encounter any issues while using the Citizen Squad app, consider the following troubleshooting steps:
+
+### 1. Search Functionality Not Working
+- *Issue*: The search feature does not return results.
+- *Solution*: Double-check the keywords entered. Clear the app cache and restart.
+
+### 2. Filters Not Applying
+- *Issue*: Filters do not seem to apply correctly.
+- *Solution*: Ensure you select at least one filter before applying. If the app crashes, try restarting it.
+- *Tip*: An "All Filters" option is available to reset filters easily.
+
+### 3. App Crashing on Start
+- *Issue*: The app crashes when you try to open it.
+- *Solution*: Make sure the app is up to date. If the problem persists, reinstall the app.
+
+### 4. Notifications Not Receiving
+- *Issue*: Users do not receive notifications about reports.
+- *Solution*: Check app permissions to ensure notifications are enabled. Also, verify your internet connection.
+
+### 5. Google Maps Not Responding
+- *Issue*: Google Maps integration is not working.
+- *Solution*: Ensure that location services are enabled on your device and that you have a stable internet connection.
+
+If the issue persists, please [open an issue](https://github.com/Shubham-zone/citizen-squad/issues) for further assistance.
 
 ## Contributing
 We welcome contributions from the community! To contribute, follow these steps:
