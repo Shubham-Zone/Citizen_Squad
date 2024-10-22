@@ -16,7 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
 
-const kGoogleApiKey = "AIzaSyC7qpjPMj0nVD1mXL0HiOBgIgGKxAvYaKo";
+const kGoogleApiKey = "YOUR_GOOGLE_API_KEY";
 
 class CriminalCars extends StatefulWidget {
   const CriminalCars({super.key});
