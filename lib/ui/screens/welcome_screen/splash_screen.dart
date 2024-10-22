@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/Helpers/navigation_bar.dart';
-import 'package:hackingly_new/authentication/phone_auth.dart';
+import 'package:hackingly_new/helpers/navigation_bar.dart';
+import 'package:hackingly_new/ui/authentication/phone_auth.dart';
 import 'package:hackingly_new/ui/screens/user/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

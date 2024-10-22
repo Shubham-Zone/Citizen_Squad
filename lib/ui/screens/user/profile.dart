@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/Helpers/Provider.dart';
+import 'package:hackingly_new/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +15,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ReportsProvider>(context);
+    final provider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(

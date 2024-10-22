@@ -9,8 +9,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
-import 'package:hackingly_new/Helpers/Provider.dart';
-import 'package:hackingly_new/data/mongodb/mongo_provider.dart';
+import 'package:hackingly_new/providers/mongo_provider.dart';
+import 'package:hackingly_new/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:provider/provider.dart';
@@ -295,16 +295,17 @@ class _PotHolesReportState extends State<PotHolesReport> {
     });
 
     // rto.push().set(data);
-    if (mounted)
+    if (mounted){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(" Reports Submitted Successfuly"),
         backgroundColor: Colors.green,
       ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<ReportsProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     userProvider.getUserDetail();
 

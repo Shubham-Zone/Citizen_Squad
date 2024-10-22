@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/data/mongodb/constants.dart';
-import 'package:hackingly_new/data/mongodb/reports.dart';
+import 'package:hackingly_new/utils/constants.dart';
+import 'package:hackingly_new/models/reports_model.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class MongoProvider extends ChangeNotifier {

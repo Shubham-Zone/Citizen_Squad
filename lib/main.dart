@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hackingly_new/Helpers/Provider.dart';
+import 'package:hackingly_new/providers/user_provider.dart';
 import 'package:provider/provider.dart';
-
-import 'package:hackingly_new/data/mongodb/mongo_provider.dart';
-import 'package:hackingly_new/ui/screens/auth/splash_screen.dart';
+import 'package:hackingly_new/providers/mongo_provider.dart';
+import 'package:hackingly_new/ui/screens/welcome_screen/splash_screen.dart';
 import 'package:hackingly_new/firebase_options.dart';
 
 void main() async {
@@ -34,8 +33,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<MongoProvider>(
           create: (_) => MongoProvider(),
         ),
-        ChangeNotifierProvider<ReportsProvider>(
-          create: (_) => ReportsProvider(),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(),
         ),
       ],
       child: MaterialApp(

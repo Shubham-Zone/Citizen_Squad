@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/data/mongodb/mongo_provider.dart';
-import 'package:hackingly_new/data/mongodb/reports.dart';
+import 'package:hackingly_new/providers/mongo_provider.dart';
+import 'package:hackingly_new/models/reports_model.dart';
 import 'package:provider/provider.dart';
 
 class Reports extends StatelessWidget {

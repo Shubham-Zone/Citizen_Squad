@@ -2,16 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class PatientRecord {
-  String name;
-  String dateOfBirth;
-  String gender;
-
-  PatientRecord(
-      {required this.name, required this.dateOfBirth, required this.gender});
-}
-
-class ReportsProvider extends ChangeNotifier {
+class UserProvider extends ChangeNotifier {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   static String userid = FirebaseAuth.instance.currentUser!.uid;
