@@ -3,14 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:hackingly_new/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:hackingly_new/providers/mongo_provider.dart';
-import 'package:hackingly_new/ui/screens/welcome_screen/splash_screen.dart';
+import 'package:hackingly_new/pages/screens/welcome_screen/splash_screen.dart';
 import 'package:hackingly_new/firebase_options.dart';
 
 void main() async {
-  // Connect to MongoDB
-  await MongoProvider().connectToMongo();
 
   WidgetsFlutterBinding.ensureInitialized();
+  // Connect to MongoDB
+  await MongoProvider().connectToMongo();
 
   if (Firebase.apps.isNotEmpty) {
     // The Firebase app has already been initialized, so don't initialize it again.

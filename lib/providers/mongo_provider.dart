@@ -4,13 +4,14 @@ import 'package:hackingly_new/models/reports_model.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class MongoProvider extends ChangeNotifier {
+  
   static Db? _db;
   static late DbCollection _collection;
 
   Db? get db => _db;
 
   Future<void> connectToMongo() async {
-    _db = await Db.create(url);
+    _db = await Db.create(Constants.url);
     await _db!.open();
     _collection = _db!.collection("Reports");
     notifyListeners();
@@ -18,9 +19,9 @@ class MongoProvider extends ChangeNotifier {
 
   Future<void> setReport(Map<String, dynamic> data) async {
     try {
-      await _collection.insert(data); // Await the insertion operation
+      await _collection.insert(data); 
     } catch (e) {
-      print("Error while submitting report: $e");
+      debugPrint("Error while submitting report: $e");
     }
   }
 
@@ -30,7 +31,7 @@ class MongoProvider extends ChangeNotifier {
       final List<Map<String, Object?>> data = await _collection.find().toList();
       reportList = data.map((json) => Report.fromJson(json)).toList();
     } catch (e) {
-      print("Error getting reports : $e");
+      debugPrint("Error getting reports : $e");
     }
     return reportList;
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:hackingly_new/providers/user_provider.dart';
-import 'package:hackingly_new/ui/screens/utilities/criminal_cars.dart';
-import 'package:hackingly_new/ui/screens/utilities/garbage.dart';
-import 'package:hackingly_new/ui/screens/utilities/potholes_report.dart';
+import 'package:hackingly_new/pages/screens/utilities/abandoned_cars.dart';
+import 'package:hackingly_new/pages/screens/utilities/garbage.dart';
+import 'package:hackingly_new/pages/screens/utilities/potholes_report.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker package
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences package
@@ -130,7 +130,7 @@ class _IndexState extends State<Index> {
   List labels = ["VEHICLE", "GARBAGE", "POTHOLES"];
 
   List pages = [
-    const CriminalCars(),
+    const AbandonedCars(),
     const GarbageReport(),
     const PotHolesReport()
   ];
