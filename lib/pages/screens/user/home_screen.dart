@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/helpers/navigation_bar.dart';
+import 'package:hackingly_new/controllers/navigation_bar_controller.dart';
 import 'package:intl/intl.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Welcome extends StatelessWidget {
@@ -134,7 +133,7 @@ class _InformationCollectionState extends State<InformationCollection> {
   void initState() {
     final User? user = auth.currentUser;
     userid = user!.uid;
-    dateInput.text = ""; //set the initial value of text field
+    dateInput.text = "";
     super.initState();
   }
 
@@ -303,7 +302,7 @@ class _InformationCollectionState extends State<InformationCollection> {
                     prefs.setBool("UserDetails", true);
 
                     // Navigate to the NavBar screen and pass the information
-                    if (mounted)
+                    if (mounted){
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -312,6 +311,7 @@ class _InformationCollectionState extends State<InformationCollection> {
                           ),
                         ),
                       );
+                    }
                   }
                 },
                 child: const Text("Continue"),

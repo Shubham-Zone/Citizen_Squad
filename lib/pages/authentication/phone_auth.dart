@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hackingly_new/ui/authentication/otp_delivery.dart';
+import 'package:hackingly_new/pages/authentication/otp_delivery.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -145,7 +145,7 @@ class _PhoneState extends State<Phone> {
                           codeSent:
                               (String verificationId, int? resendToken) async {
                             Phone.verify = verificationId;
-                            //saving mobile no to local storage
+                            // saving mobile no to local storage
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setInt(
                                 'phoneNo', int.parse(mobno.text));

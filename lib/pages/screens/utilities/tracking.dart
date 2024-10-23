@@ -76,7 +76,7 @@ class _TrackState extends State<Track> {
 }
 
 class Vehicles extends StatefulWidget {
-  const Vehicles({Key? key});
+  const Vehicles({super.key});
 
   @override
   State<Vehicles> createState() => _VehiclesState();
