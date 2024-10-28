@@ -68,6 +68,13 @@ If you encounter any issues while using the Citizen Squad app, consider the foll
 - *Issue*: Google Maps integration is not working.
 - *Solution*: Ensure that location services are enabled on your device and that you have a stable internet connection.
 
+### 5. Issue while performing login
+- *Issue*: Users are not able to login with their personal mobile number.
+- *Solution*: Try logging in with this Test number and OTP. 
+              Test Number : 9999999999
+              Test OTP: 000000
+
+
 If the issue persists, please [open an issue](https://github.com/Shubham-zone/citizen-squad/issues) for further assistance.
 
 ## Contributing
