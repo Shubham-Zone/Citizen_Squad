@@ -131,7 +131,7 @@ class _PhoneState extends State<Phone> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (mobno.text.isNotEmpty) {
-                        hideWidget();
+                        // hideWidget();
                         await FirebaseAuth.instance.verifyPhoneNumber(
                           phoneNumber: countrycode.text + phone,
                           verificationCompleted:
