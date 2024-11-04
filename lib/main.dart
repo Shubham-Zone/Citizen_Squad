@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hackingly_new/providers/abandoned_cars_provider.dart.dart';
+import 'package:hackingly_new/providers/admin_dashboard.dart.dart';
+import 'package:hackingly_new/providers/garbage_report_provider.dart';
 import 'package:hackingly_new/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:hackingly_new/providers/mongo_provider.dart';
@@ -35,6 +38,15 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<UserProvider>(
           create: (_) => UserProvider(),
+        ),
+        ChangeNotifierProvider<AbandonedCarsProvider>(
+          create: (_) => AbandonedCarsProvider(),
+        ),
+        ChangeNotifierProvider<GarbageReportProvider>(
+          create: (_) => GarbageReportProvider(),
+        ),
+        ChangeNotifierProvider<AdminDashboardProvider>(
+          create: (_) => AdminDashboardProvider(),
         ),
       ],
       child: MaterialApp(
